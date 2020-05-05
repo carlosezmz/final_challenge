@@ -146,7 +146,7 @@ def extract_cols(partId, records):
             st_intc = row[25].upper()
         
             # chechk for county
-            if (county) & (county[:2] != '00'):
+            if (type(county) == str) & (county[:2] != '00') & (len(county) > 0):
                 county = county.lower()
                 county = check_county(county)
         
