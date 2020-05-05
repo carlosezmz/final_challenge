@@ -128,6 +128,9 @@ def check_int_street(st_intc):
 
 def extract_cols(partId, records):
     
+    if partId==0:
+        next(records)
+    
     from datetime import datetime
     import csv
     
@@ -169,8 +172,8 @@ def extract_cols(partId, records):
                 
 def extract_segment(partId, records):
     
-#     if partId==0:
-#         next(records)
+    if partId==0:
+        next(records)
     import csv
     reader = csv.reader(records)
     
@@ -200,7 +203,7 @@ def run_spark(sc, fie_dir, center_dir):
                                     .filter(lambda x: (x[2] >= x[4] and x[2] <= x[5]) or (x[2] >= x[6] and x[2] <= x[7]))\
                                     .map(lambda x: (x[3], 1))\
                                     .reduceByKey(lambda x,y: x+y)\
-                                    .sortByKey(True)
+                                    .sortByKey()
     
     return parking_violations
             
@@ -229,7 +232,7 @@ def main(sc):
     
     parking_violations = parking_violations.mapValues(lambda x: (x[0], x[1], x[2], x[3], x[4], (x[4]-x[0])/4))
     
-    parking_violations.saveAsTextFile('hdfs:////user/ctavare003/parkingViolation_count.csv')
+    parking_violations.saveAsTextFile('hdfs:////user/ctavare003/parkingViolation_count')
 
     
 if __name__ == '__main__':
