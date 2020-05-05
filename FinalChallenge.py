@@ -217,7 +217,7 @@ def main(sc, spark):
     center_line = spark.read.load(center_dir, format='csv', header=True, inferSchema=True)
     
     center_line = center_line.select(
-    center_line['PHYSICALID'].cast('int').alias('phy_id'),
+    center_line['PHYSICALID'].alias('phy_id'),
     center_line['L_LOW_HN'].alias('l_low'),
     center_line['L_HIGH_HN'].alias('l_hig'),
     center_line['BOROCODE'].cast('int').alias('boro'),
