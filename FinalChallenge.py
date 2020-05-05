@@ -196,7 +196,7 @@ def run_spark(sc, spark, fie_dir, center_line):
     
     
     parking_violations = parking_violations.join(center_line, 
-                        [parking_violations.boro == center_line.boro, violations.st_name == center_line.st_name], 
+                        [parking_violations.boro == center_line.boro, parking_violations.st_name == center_line.st_name], 
                         'inner')
     
     parking_violations = parking_violations.select('year', 'st_numb', 'phy_id', 'l_low', 'l_hig')
