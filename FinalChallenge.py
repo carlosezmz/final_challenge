@@ -138,36 +138,40 @@ def extract_cols(partId, records):
     for row in reader:
         
         if len(row) == 43:
+            
+            try:
         
-            county = row[21]
-            number = str(row[23])
-            year = datetime.strptime(row[4], '%m/%d/%Y').year
-            st_name = row[24].upper()
-            st_intc = row[25].upper()
+                county = row[21]
+                number = str(row[23])
+                year = datetime.strptime(row[4], '%m/%d/%Y').year
+                st_name = row[24].upper()
+                st_intc = row[25].upper()
         
             # chechk for county
-            if county:
-                county = county.lower()
-                county = check_county(county)
+                if county:
+                    county = county.lower()
+                    county = check_county(county)
         
 #                 # check for house number
 #                 number = check_house_number(number)
         
-                # check for street name
-                st_name = check_name(st_name)
+                    # check for street name
+                    st_name = check_name(st_name)
         
-                # check intersection name
-                st_intc = check_int_street(st_intc)
+                    # check intersection name
+                    st_intc = check_int_street(st_intc)
     
         
-                if year in [2015, 2016, 2017, 2018, 2019]:
+                    if year in [2015, 2016, 2017, 2018, 2019]:
             
 #                     if type(number) != str:
                 
-                    if county:
+                        if county:
             
-                        yield (county, (year, st_name, number, st_intc))
+                            yield (county, (year, st_name, number, st_intc))
                 
+            except ValueError:
+                continue
                 
                 
 def extract_segment(partId, records):
