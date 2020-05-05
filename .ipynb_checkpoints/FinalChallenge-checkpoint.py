@@ -186,7 +186,7 @@ def get_phyID(partID, records):
                 yield (phy_id, 1)
     
     
-def run_spark(sc, fie_dir, center_dir):
+def run_spark(sc, spark, fie_dir, center_line):
     
     
     parking_violations = sc.textFile(fie_dir)\
@@ -234,11 +234,11 @@ def main(sc, spark):
     fie2018_dir = 'hdfs:///data/share/bdm/nyc_parking_violation/2018.csv'
     fie2019_dir = 'hdfs:///data/share/bdm/nyc_parking_violation/2019.csv'
     
-    parking_violations_2015 = run_spark(sc, fie2015_dir, center_dir)
-    parking_violations_2016 = run_spark(sc, fie2016_dir, center_dir)
-    parking_violations_2017 = run_spark(sc, fie2017_dir, center_dir)
-    parking_violations_2018 = run_spark(sc, fie2018_dir, center_dir)
-    parking_violations_2019 = run_spark(sc, fie2019_dir, center_dir)
+    parking_violations_2015 = run_spark(sc, spark, fie2015_dir, center_line)
+    parking_violations_2016 = run_spark(sc, spark, fie2016_dir, center_line)
+    parking_violations_2017 = run_spark(sc, spark, fie2017_dir, center_line)
+    parking_violations_2018 = run_spark(sc, spark, fie2018_dir, center_line)
+    parking_violations_2019 = run_spark(sc, spark, fie2019_dir, center_line)
     
     parking_violations = parking_violations_2015.join(parking_violations_2016)
     parking_violations = parking_violations.join(parking_violations_2017)
