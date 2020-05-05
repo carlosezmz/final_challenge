@@ -100,7 +100,7 @@ def check_house_number(number):
 def check_county(county):
     
     boro_dict = {
-        'ny':1, 'ne': 1, 'ma':1, 'mn':1,
+        'ny':1, 'ne': 1, 'ma':1, 'mn':1, 'mh':1,
         'bx':2, 'br':2,
         'k': 3, 'ki':3, 'bk':3,
         'q': 4, 'qn':4, 'qu':4, 
