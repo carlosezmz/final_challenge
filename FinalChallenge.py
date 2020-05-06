@@ -207,8 +207,15 @@ def run_spark(sc, spark, fie_dir, center_line):
 
     
     return parking_violations
+ 
+    
+def conver_csv(_, records):
+    
+    for phy_id, count in records:
+        
+
             
-            
+        yield ','.join((str(phy_id), str(count)))           
             
 def main(sc, spark):
     
@@ -248,7 +255,10 @@ def main(sc, spark):
     parking_violations = parking_violations.mapValues(lambda x: (x[0], x[1], x[2], x[3], x[4], 
                                                                  ((x[4]-x[3]) + (x[3]-x[2]) + (x[2]-x[1]) + (x[1]-x[0]))/4))
     
-    parking_violations.saveAsTextFile('hdfs:////user/ctavare003/parkingViolation_count')
+    
+    
+    parking_violations.mapPartitionsWithIndex(conver_csv)\
+                      .saveAsTextFile('parkingViolation_count')
 
     
 if __name__ == '__main__':
