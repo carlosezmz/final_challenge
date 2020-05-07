@@ -164,13 +164,15 @@ def rtree_idx(df):
     for idx, row in df.iterrows():
         
         if not row[0]: continue
+        index.insert(idx, geometry.bounds)
+           
             
         
-        geometry = make_polygon(row[2])
+#         geometry = make_polygon(row[2])
         
-        if geometry:
+#         if geometry:
             
-            index.insert(idx, geometry.bounds)
+#          index.insert(idx, geometry.bounds)
                 
     return (index, df)
 
@@ -222,7 +224,7 @@ def extract_cols(partId, records):
     import csv
     import geopandas as gpd
     
-    center_dir = 'nyc_cscl.csv'
+    center_dir = 'hdfs:///data/share/bdm/nyc_cscl.csv'
     
     df_ct = gpd.read_file(center_dir)
     
@@ -286,9 +288,12 @@ def conver_csv(_, records):
     
     for phy_id, count in records:
             
-        yield ','.join((str(phy_id), str(count)))           
+        yield ','.join((str(phy_id), str(count)))   
+        
             
-def main(sc):
+if __name__ == '__main__':
+    
+    sc = SparkContext()
     
 #     center_dir = 'hdfs:///data/share/bdm/nyc_cscl.csv'
     
@@ -331,11 +336,3 @@ def main(sc):
     parking_violations.mapPartitionsWithIndex(conver_csv)\
                       .saveAsTextFile('parkingViolation_count')
 
-    
-if __name__ == '__main__':
-    
-    sc = SparkContext()
-#     spark = SparkSession(sc)
-    
-    main(sc)
-        
