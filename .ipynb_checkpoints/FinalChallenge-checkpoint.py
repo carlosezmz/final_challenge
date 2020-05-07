@@ -222,7 +222,7 @@ def extract_cols(partId, records):
     import csv
     import geopandas as gpd
     
-    center_dir = 'hdfs:///data/share/bdm/nyc_cscl.csv'
+    center_dir = 'nyc_cscl.csv'
     
     df_ct = gpd.read_file(center_dir)
     
