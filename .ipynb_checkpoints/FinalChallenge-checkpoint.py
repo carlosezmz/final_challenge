@@ -164,21 +164,19 @@ def rtree_idx(df):
     for idx, row in df.iterrows():
         
         if not row[0]: continue
-        index.insert(idx, geometry.bounds)
-           
             
         
-#         geometry = make_polygon(row[2])
+        geometry = make_polygon(row[2])
         
-#         if geometry:
+        if geometry:
             
-#          index.insert(idx, geometry.bounds)
+            index.insert(idx, geometry.bounds)
                 
     return (index, df)
 
 def make_polygon(geom):
     
-    from shapely.geometry import Polygon
+    from shapely.geometry import LineString
     from shapely.geometry import Point
 
     emp_list = []
@@ -192,11 +190,11 @@ def make_polygon(geom):
     
         emp_list.append((lon, lat))
     
-    if len(emp_list) > 2:
-        emp_list = Polygon(emp_list)
+    if len(emp_list) > 1:
+        emp_list = LineString(emp_list)
         return emp_list
     
-    elif (len(emp_list) < 3) & (len(emp_list) > 0):
+    elif len(emp_list) > 0:
         emp_list = Point(emp_list)
         return emp_list
         
@@ -254,6 +252,8 @@ def extract_cols(partId, records):
             county = check_county(county)
                 
             point = get_point(number, st_name, county)
+            
+            if point == 0: continue
             
             st_int = find_segment(point, index, df)
             
