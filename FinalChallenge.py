@@ -220,11 +220,11 @@ def extract_cols(partId, records):
         next(records)
         
     import csv
-    import geopandas as gpd
+    import pandas as pd
     
     center_dir = 'hdfs:///data/share/bdm/nyc_cscl.csv'
     
-    df_ct = gpd.read_file(center_dir)
+    df_ct = pd.read_csv(center_dir)
     
     df_ct['geometry'] = df_ct['the_geom'].map(make_polygon)
 #     df_ct['BOROCODE'] = df_ct['BOROCODE'].map(check_county)
