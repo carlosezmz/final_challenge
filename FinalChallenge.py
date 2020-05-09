@@ -233,7 +233,7 @@ def extract_cols(partId, records):
     import csv
     from datetime import datetime
     
-    center_line = get_centerLine(center_dir)
+#     center_line = get_centerLine(center_dir)
     
     reader = csv.reader(records)
     
