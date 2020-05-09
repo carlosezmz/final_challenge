@@ -255,11 +255,13 @@ def extract_cols(partId, records):
 
                 if type(number) == tuple:
                     
-                    phy_id = get_phyID(county, st_name, number, center_line)
+                    yield (county, st_name, number)
+                    
+#                     phy_id = get_phyID(county, st_name, number, center_line)
                 
-                    if phy_id:
+#                     if phy_id:
             
-                        yield (phy_id, 1)
+#                         yield (phy_id, 1)
     
     
 def extract_bounds(partID, records):
@@ -285,7 +287,7 @@ def extract_bounds(partID, records):
                 yield (county, st_name, phy_id, l_low, l_hig)
     
     
-def run_spark(parking_violations, center_line):
+def run_spark(sc, fie2015_dir):
     
     parking_violations = sc.textFile(fie2015_dir)\
                            .mapPartitionsWithIndex(extract_cols)\
@@ -352,8 +354,8 @@ if __name__ == '__main__':
     
     parking_violations = sc.textFile(fie2015_dir)\
                            .mapPartitionsWithIndex(extract_cols)\
-                           .reduceByKey(lambda x,y: x+y)\
-                           .sortByKey()
+#                            .reduceByKey(lambda x,y: x+y)\
+#                            .sortByKey()
 #                            .cache()
     
 #     files_list = [fie2015_dir, fie2016_dir, fie2017_dir, fie2018_dir, fie2019_dir]
