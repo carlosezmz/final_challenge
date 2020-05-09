@@ -369,7 +369,7 @@ if __name__ == '__main__':
     center_dir = 'hdfs:///data/share/bdm/nyc_cscl.csv'
     
     center_line = sc.textFile(center_dir)\
-                .mapPartitionsWithIndex(extract_bounds).collect()
+                .mapPartitionsWithIndex(extract_bounds).cache()
     
 #     center_line = spark.read.load(center_dir, format='csv', header=True, inferSchema=True)
     
@@ -394,7 +394,7 @@ if __name__ == '__main__':
 #     files_list = [fie2015_dir, fie2016_dir, fie2017_dir, fie2018_dir, fie2019_dir]
     
     parking_violations = sc.textFile(fie2015_dir)\
-                .mapPartitionsWithIndex(extract_cols).collect()
+                .mapPartitionsWithIndex(extract_cols).cache()cd 
     
     parking_violations = run_spark(parking_violations, center_line)
 #     parking_violations_2016 = run_spark(sc, fie2016_dir)
