@@ -412,5 +412,5 @@ if __name__ == '__main__':
     
     
     
-    parking_violations.mapPartitionsWithIndex(conver_csv).saveAsTextFile('/user/ctavare003/parkingViolation_count')
+    parking_violations.mapPartitionsWithIndex(conver_csv).saveAsTextFile('/user/ctavare003/Violation_count')
 
