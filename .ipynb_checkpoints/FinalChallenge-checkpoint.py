@@ -347,7 +347,8 @@ def run_spark(parking_violations, center_line):
 
     parking_violations = parking_violations.join(center_line).values()\
                         .filter(lambda x: (x[0][0] == x[1][0]) & (x[0][1] >= x[1][2]) & (x[0][1] <= x[1][3]))\
-                        .map(lambda x: (x[1][1], x[0][2])).collect()
+                        .map(lambda x: (x[1][1], 1))\
+                        .reduceByKey(lambda x,y: x+y)
 
     
     return parking_violations
@@ -363,6 +364,7 @@ def conver_csv(_, records):
 if __name__ == '__main__':
     
     sc = SparkContext()
+    spark = SparkSession(sc)
     
     center_dir = 'hdfs:///data/share/bdm/nyc_cscl.csv'
     
