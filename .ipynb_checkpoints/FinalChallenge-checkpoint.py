@@ -190,24 +190,24 @@ def street_bounds(l_low, l_hig, r_low, r_hig):
     
     return (l_low, l_hig)
 
-def get_centerLine(center_dir):
+# def get_centerLine(center_dir):
     
-    from pyspark import SparkContext
-    import pandas as pd
+#     from pyspark import SparkContext
+#     import pandas as pd
     
-    sc = SparkContext()
+#     sc = SparkContext()
     
-    center_line = sc.textFile(center_dir)\
-                    .mapPartitionsWithIndex(extract_bounds)\
-                    .collect()
+#     center_line = sc.textFile(center_dir)\
+#                     .mapPartitionsWithIndex(extract_bounds)\
+#                     .collect()
     
-    center_line = pd.DataFrame(center_line, columns=['county', 
-                                                     'st_name', 
-                                                     'number', 
-                                                     'min_bound', 
-                                                     'max_ bound'])
+#     center_line = pd.DataFrame(center_line, columns=['county', 
+#                                                      'st_name', 
+#                                                      'number', 
+#                                                      'min_bound', 
+#                                                      'max_ bound'])
     
-    return center_line
+#     return center_line
 
 def get_phyID(county, st_name, number, center_line):
     
@@ -359,7 +359,7 @@ if __name__ == '__main__':
     fie2019_dir = 'hdfs:///data/share/bdm/nyc_parking_violation/2019.csv'
     
     parking_violations = sc.textFile(fie2015_dir)\
-                           .mapPartitionsWithIndex(extract_cols)\
+                           .mapPartitionsWithIndex(extract_cols)
 #                            .reduceByKey(lambda x,y: x+y)\
 #                            .sortByKey()
 #                            .cache()
@@ -367,7 +367,7 @@ if __name__ == '__main__':
     parking_violations = parking_violations.join(center_line).values()\
                         .filter(lambda x: (x[0][0] == x[1][0]) & (x[0][1] >= x[1][2]) & (x[0][1] <= x[1][3]))\
                         .map(lambda x: (x[1][1], 1))\
-                        .reduceByKey(lambda x,y: x+y).sortByKey().cache()
+                        .reduceByKey(lambda x,y: x+y).sortByKey()
     
 #     files_list = [fie2015_dir, fie2016_dir, fie2017_dir, fie2018_dir, fie2019_dir]
     
