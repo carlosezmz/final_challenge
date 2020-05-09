@@ -95,7 +95,7 @@ def check_house_number(number):
                 
                     
     elif type(number) == int:
-        number = (number, 0)
+        number = (int(number), 0)
                     
     elif type(number) == list:
         number[0] = get_digits(number[0])
@@ -106,7 +106,7 @@ def check_house_number(number):
 def check_county(county):
     
     boro_dict = {
-        'ny':'new york', 'ne': 'new york', 'ma':'new york', 'mn':'new york', '1': 'new york', 'mh':'new york',
+        'ny':'new york', 'ne': 'new york', 'ma':'new york', 'mn':'new york', '1': 'new york',
         'bx':'bronx', 'br':'bronx', '2': 'bronx',
         'k': 'brooklyn', 'ki':'brooklyn', 'bk':'brooklyn', '3':'brooklyn',
         'q': 'queens', 'qn':'queens', 'qu':'queens', '4':'queens',
@@ -270,15 +270,42 @@ def street_bounds(l_low, l_hig, r_low, r_hig):
     l_hig = max(l_hig, r_hig)
     
     return (l_low, l_hig)
+
+def get_centerLine(center_dir):
+    
+    from pyspark import SparkContext
+    
+    sc = SparkContext()
+    
+    center_line = sc.textFile(center_dir)\
+                    .mapPartitionsWithIndex(extract_bounds)
+    
+    return center_line
+
+def get_phyID(county, st_name, number, center_line):
+    
+    phy_id = center_line.filter(lambda x: (x[0] == county)\
+                                & (x[1] == st_name)\
+                                & (x[3] <= number)\
+                                & (x[4] >= number)).collect()
+    
+    if len(phy_id) > 0:
+        return phy_id[0][2]
+    else:
+        return None
         
 
 def extract_cols(partId, records):
+    
+    center_dir = 'hdfs:///data/share/bdm/nyc_cscl.csv'
     
     if partId==0:
         next(records)
         
     import csv
     from datetime import datetime
+    
+    center_line = get_centerLine(center_dir)
     
     reader = csv.reader(records)
     
@@ -299,8 +326,12 @@ def extract_cols(partId, records):
 #                 if (type(number[0]) == int) & (type(number[1]) == int) & (type(number) == tuple):
 
                 if type(number) == tuple:
+                    
+                    phy_id = get_phyID(county, st_name, number, center_line)
+                
+                    if phy_id:
             
-                    yield (county, (st_name, number, year))
+                        yield (phy_id, 1)
     
     
 def extract_bounds(partID, records):
@@ -323,10 +354,16 @@ def extract_bounds(partID, records):
             
             if (l_hig != l_low) & (type(l_low) == tuple) & (type(l_hig) == tuple):
         
-                yield (county, (st_name, phy_id, l_low, l_hig))
+                yield (county, st_name, phy_id, l_low, l_hig)
     
     
 def run_spark(parking_violations, center_line):
+    
+    parking_violations = sc.textFile(fie2015_dir)\
+                           .mapPartitionsWithIndex(extract_cols)\
+                           .reduceByKey(lambda x,y: x+y)\
+                           .sortByKey()\
+                           .cache()
     
     
 #     parking_violations = sc.textFile(fie_dir)\
@@ -345,10 +382,10 @@ def run_spark(parking_violations, center_line):
 #                                                .reduceByKey(lambda x,y: x+y)\
 #                                                .sortByKey()
 
-    parking_violations = parking_violations.join(center_line).values()\
-                        .filter(lambda x: (x[0][0] == x[1][0]) & (x[0][1] >= x[1][2]) & (x[0][1] <= x[1][3]))\
-                        .map(lambda x: (x[1][1], 1))\
-                        .reduceByKey(lambda x,y: x+y).sortByKey().cache()
+#     parking_violations = parking_violations.join(center_line).values()\
+#                         .filter(lambda x: (x[0][0] == x[1][0]) & (x[0][1] >= x[1][2]) & (x[0][1] <= x[1][3]))\
+#                         .map(lambda x: (x[1][1], 1))\
+#                         .reduceByKey(lambda x,y: x+y).sortByKey().cache()
 
     
     return parking_violations
@@ -364,12 +401,6 @@ def conver_csv(_, records):
 if __name__ == '__main__':
     
     sc = SparkContext()
-    spark = SparkSession(sc)
-    
-    center_dir = 'hdfs:///data/share/bdm/nyc_cscl.csv'
-    
-    center_line = sc.textFile(center_dir)\
-                .mapPartitionsWithIndex(extract_bounds).cache()
     
 #     center_line = spark.read.load(center_dir, format='csv', header=True, inferSchema=True)
     
@@ -393,10 +424,8 @@ if __name__ == '__main__':
     
 #     files_list = [fie2015_dir, fie2016_dir, fie2017_dir, fie2018_dir, fie2019_dir]
     
-    parking_violations = sc.textFile(fie2015_dir)\
-                .mapPartitionsWithIndex(extract_cols).cache()
     
-    parking_violations = run_spark(parking_violations, center_line)
+    parking_violations = run_spark(sc, fie2015_dir)
 #     parking_violations_2016 = run_spark(sc, fie2016_dir)
 #     parking_violations_2017 = run_spark(sc, fie2017_dir)
 #     parking_violations_2018 = run_spark(sc, fie2018_dir)
