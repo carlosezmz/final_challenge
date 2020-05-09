@@ -348,7 +348,7 @@ def run_spark(parking_violations, center_line):
     parking_violations = parking_violations.join(center_line).values()\
                         .filter(lambda x: (x[0][0] == x[1][0]) & (x[0][1] >= x[1][2]) & (x[0][1] <= x[1][3]))\
                         .map(lambda x: (x[1][1], 1))\
-                        .reduceByKey(lambda x,y: x+y)
+                        .reduceByKey(lambda x,y: x+y).sortByKey().cache()
 
     
     return parking_violations
@@ -412,5 +412,5 @@ if __name__ == '__main__':
     
     
     
-    parking_violations.mapPartitionsWithIndex(conver_csv).saveAsTextFile('/user/ctavare003/Violation_count')
+    parking_violations.saveAsTextFile('/user/ctavare003/Violation_count')
 
