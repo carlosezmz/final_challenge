@@ -336,7 +336,7 @@ if __name__ == '__main__':
     sc = SparkContext()
     
     center_line = sc.textFile(center_dir)\
-                    .mapPartitionsWithIndex(extract_bounds).cahche()
+                    .mapPartitionsWithIndex(extract_bounds).cache()
     
 #     center_line = spark.read.load(center_dir, format='csv', header=True, inferSchema=True)
     
