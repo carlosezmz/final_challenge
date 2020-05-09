@@ -4,7 +4,7 @@
 
 # main
 from pyspark import SparkContext
-from pyspark.sql.session import SparkSession
+# from pyspark.sql.session import SparkSession
 
 
 
@@ -274,30 +274,39 @@ def street_bounds(l_low, l_hig, r_low, r_hig):
 def get_centerLine(center_dir):
     
     from pyspark import SparkContext
+    import pandas as pd
     
     sc = SparkContext()
     
     center_line = sc.textFile(center_dir)\
-                    .mapPartitionsWithIndex(extract_bounds)
+                    .mapPartitionsWithIndex(extract_bounds)\
+                    .collect()
+    
+    center_line = pd.DataFrame(center_line, columns=['county', 
+                                                     'st_name', 
+                                                     'number', 
+                                                     'min_bound', 
+                                                     'max_ bound'])
     
     return center_line
 
 def get_phyID(county, st_name, number, center_line):
     
-    phy_id = center_line.filter(lambda x: (x[0] == county)\
-                                & (x[1] == st_name)\
-                                & (x[3] <= number)\
-                                & (x[4] >= number)).collect()
+    phy_id = center_line[(center_line['county'] == county)\
+                        & (center_line['st_name']== st_name)\
+                        & (center_line['min_bound'] <= number)\
+                        & (center_line['max_ bound'] >= number)]
     
-    if len(phy_id) > 0:
-        return phy_id[0][2]
+
+    if phy_id.shape[0] > 0:
+        return phy_id['number'][0]
     else:
         return None
         
 
 def extract_cols(partId, records):
     
-    center_dir = 'hdfs:///data/share/bdm/nyc_cscl.csv'
+    center_dir = '/Users/carlostavarez/Desktop/big_data_challenge/Centerline.csv'
     
     if partId==0:
         next(records)
