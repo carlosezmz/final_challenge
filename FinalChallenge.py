@@ -253,7 +253,7 @@ def extract_cols(partId, records):
                 
                 if (type(number[0]) == int) & (type(number[1]) == int) & (type(number) == tuple):
 
-                if type(number) == tuple:
+#                 if type(number) == tuple:
                     
 #                     yield (county, st_name, number)
                     
