@@ -106,7 +106,7 @@ def check_house_number(number):
 def check_county(county):
     
     boro_dict = {
-        'ny':'new york', 'ne': 'new york', 'ma':'new york', 'mn':'new york', '1': 'new york',
+        'ny':'new york', 'ne': 'new york', 'ma':'new york', 'mn':'new york', '1': 'new york', 'mh':'new york',
         'bx':'bronx', 'br':'bronx', '2': 'bronx',
         'k': 'brooklyn', 'ki':'brooklyn', 'bk':'brooklyn', '3':'brooklyn',
         'q': 'queens', 'qn':'queens', 'qu':'queens', '4':'queens',
