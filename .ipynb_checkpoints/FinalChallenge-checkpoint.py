@@ -128,76 +128,6 @@ def check_county(county):
 
 
 
-def get_point(number, st_name, county):
-    
-#     import pyproj
-#     from shapely.geometry import Point
-    from geopy.geocoders import Nominatim
-
-    geolocator = geopy.Nominatim(user_agent="get_latlon")
-    
-    if (len(number) > 0) & (len(county) > 0):
-        address = '{} {}, {}, NY'.format(number, st_name, county)
-                
-    elif (len(number) > 0):
-        address = '{} {}'.format(number, st_name)
-                
-    else:
-        address = st_name
-        
-    location = geolocator.geocode(address)
-    
-    if location:
-        return (location.longitude, location.latitude)
-    
-    return None
-
-def get_zipCode(longitude, latitude):
-    
-    from geopy.geocoders import Nominatim
-    
-    geolocator = Nominatim(user_agent="get_latlon")
-    
-    location = geolocator.reverse((latitude, longitude))
-    
-    zip_code = location.raw['address']['postcode']
-#     county = location.raw['address']['county']
-    
-    return zip_code
-
-def get_county(longitude, latitude):
-    
-    from geopy.geocoders import Nominatim
-    
-    geolocator = Nominatim(user_agent="get_latlon")
-    
-    location = geolocator.reverse((latitude, longitude))
-    
-#     zip_code = location.raw['address']['postcode']
-    county = location.raw['address']['county']
-    
-    return county
-
-def rtree_idx(df):
-    
-#     df = df.reset_index()
-    
-    index = rtree.Rtree()
-    
-    for idx, row in df.iterrows():
-        
-        if not row[0]: continue
-            
-        
-        geometry = make_polygon(row[2])
-        
-        if geometry:
-            
-            index.insert(idx, geometry.bounds)
-                
-    return (index, df)
-
-
 
 def make_bounds(geom):
 
@@ -223,17 +153,6 @@ def make_bounds(geom):
     else:
         return None
     
-# def find_segment(point, index, df):
-    
-#     match = index.intersection((point.x, point.y, point.x, point.y))
-    
-#     for idx in match:
-        
-#         if df.geometry[idx].contains(point):
-            
-#             return df['PHYSICALID'][idx]
-        
-#     return None
 
 def get_digits(number):
     
@@ -431,10 +350,16 @@ if __name__ == '__main__':
     fie2018_dir = 'hdfs:///data/share/bdm/nyc_parking_violation/2018.csv'
     fie2019_dir = 'hdfs:///data/share/bdm/nyc_parking_violation/2019.csv'
     
+    parking_violations = sc.textFile(fie2015_dir)\
+                           .mapPartitionsWithIndex(extract_cols)\
+                           .reduceByKey(lambda x,y: x+y)\
+                           .sortByKey()
+#                            .cache()
+    
 #     files_list = [fie2015_dir, fie2016_dir, fie2017_dir, fie2018_dir, fie2019_dir]
     
     
-    parking_violations = run_spark(sc, fie2015_dir)
+#     parking_violations = run_spark(sc, fie2015_dir)
 #     parking_violations_2016 = run_spark(sc, fie2016_dir)
 #     parking_violations_2017 = run_spark(sc, fie2017_dir)
 #     parking_violations_2018 = run_spark(sc, fie2018_dir)
