@@ -366,9 +366,9 @@ if __name__ == '__main__':
 #                            .cache()
     
     parking_violations = parking_violations.join(center_line).values()\
-                        .filter(lambda x: (x[0][0] == x[1][0]) & (x[0][1] >= x[1][2]) & (x[0][1] <= x[1][3]))\
-                        .map(lambda x: (x[1][1], 1))\
-                        .reduceByKey(lambda x,y: x+y).sortByKey()
+#                         .filter(lambda x: (x[0][0] == x[1][0]) & (x[0][1] >= x[1][2]) & (x[0][1] <= x[1][3]))\
+#                         .map(lambda x: (x[1][1], 1))\
+#                         .reduceByKey(lambda x,y: x+y).sortByKey()
     
 #     files_list = [fie2015_dir, fie2016_dir, fie2017_dir, fie2018_dir, fie2019_dir]
     
