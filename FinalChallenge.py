@@ -412,5 +412,5 @@ if __name__ == '__main__':
     
     
     
-    parking_violations.saveAsTextFile('/user/ctavare003/Violations')
+    parking_violations.saveAsTextFile('Violations')
 
