@@ -17,37 +17,37 @@ def check_name(st_name):
     st_name = st_name.replace('DRIVE', 'DR')
     st_name = st_name.replace('PLACE', 'PL')
     
-#     st_name = st_name.split(' ')
+    st_name = st_name.split(' ')
         
-#     if st_name[-1] in ['ST', 'RD', 'AVE', 'BL', 'DR', 'PL']:
+    if st_name[-1] in ['ST', 'RD', 'AVE', 'BL', 'DR', 'PL']:
             
-#         if len(st_name) == 3:
-#             try:
-#                 if st_name[1][-2:] in ['TH', 'ST', 'RD', 'ND']:
-#                     st_name[1] = int(st_name[1][:-2])
-#                     st_name[1] = str(st_name[1])
+        if len(st_name) == 3:
+            try:
+                if st_name[1][-2:] in ['TH', 'ST', 'RD', 'ND']:
+                    st_name[1] = int(st_name[1][:-2])
+                    st_name[1] = str(st_name[1])
                 
-#                 else:
-#                     st_name[1] = int(st_name[1])
-#                     st_name[1] = str(st_name[1])
+                else:
+                    st_name[1] = int(st_name[1])
+                    st_name[1] = str(st_name[1])
                 
-#             except ValueError:
-#                     st_name[1] = st_name[1]
+            except ValueError:
+                    st_name[1] = st_name[1]
                         
-#         elif len(st_name) == 2:
-#             try:
-#                 if st_name[0][-2:] in ['TH', 'ST', 'RD', 'ND']:
-#                     st_name[0] = int(st_name[0][:-2])
-#                     st_name[0] = str(st_name[0])
+        elif len(st_name) == 2:
+            try:
+                if st_name[0][-2:] in ['TH', 'ST', 'RD', 'ND']:
+                    st_name[0] = int(st_name[0][:-2])
+                    st_name[0] = str(st_name[0])
                 
-#                 else:
-#                     st_name[0] = int(st_name[0])
-#                     st_name[0] = str(st_name[0])
+                else:
+                    st_name[0] = int(st_name[0])
+                    st_name[0] = str(st_name[0])
             
-#             except ValueError:
-#                     st_name[0] = st_name[0]
+            except ValueError:
+                    st_name[0] = st_name[0]
         
-#     st_name = ' '.join(st_name)
+    st_name = ' '.join(st_name)
         
     if st_name == 'BRDWAY':
         st_name = 'BROADWAY'
@@ -56,47 +56,50 @@ def check_name(st_name):
 
 def check_house_number(number):
     
-    if (len(number) > 0) and (type(number) != list):
+    if len(number) == 0:
+        number = 0
+    
+    elif (len(number) > 0) and (type(number) != list):
         
         if '-' in number:
             number = number.split('-')
+            
+            if not number[1]: 
+                number[1] = 0
+                
+            if not number[0]: 
+                number[0] = 0
+                
+            number[0] = get_digits(number[0])
+            number[1] = get_digits(number[1])
             try:
                 number = (int(number[0]), int(number[1]))
                     
             except ValueError:
-                try:
-                    if number[1]:
-                        if number[1][0] == '0':
-                            number = (int(number[0]), int(number[1][1:]))
+
+#                 try:
                         
-                        else:
-                            number = (int(number[0][:-1]), int(number[1]))
-                            
-                    else:
-                        number = (int(number[0]), number[1])
-                except ValueError:
-                    try:
-                        number = (int(number[0]), int(number[1][:-1]))
-                    
-                    except ValueError:
-                        number = number
+                    number = (0, 0)
+
+#                 except ValueError:
+        
+#                     number = (number[0], 0)
             
         else:
+            number = get_digits(number)
             try:
-                number = int(number)
+                number = (int(number), 0)
             
             except ValueError:
-                try:
-                    number = int(number[1:])
+                number = (number, 0)
                 
-                except ValueError:
-                    number = number
                     
     elif type(number) == int:
-        number = number
+        number = (number, 0)
                     
-    if type(number) == list:
-        number = number[0]
+    elif type(number) == list:
+        number[0] = get_digits(number[0])
+        number = (number[0], 0)
                     
     return number
 
@@ -107,7 +110,8 @@ def check_county(county):
         'bx':'bronx', 'br':'bronx', '2': 'bronx',
         'k': 'brooklyn', 'ki':'brooklyn', 'bk':'brooklyn', '3':'brooklyn',
         'q': 'queens', 'qn':'queens', 'qu':'queens', '4':'queens',
-        'r': 'staten island', 's':'staten island', 'st':'staten island', '5':'staten island'
+        'r': 'staten island', 's':'staten island', 'st':'staten island', 
+            '5':'staten island', 'ri':'staten island'
                 }
     try:
         if len(county) > 2:
@@ -118,7 +122,7 @@ def check_county(county):
         
     except ValueError:
 
-        county = boro_dict[county]
+        county = ''
         
     return county
 
@@ -126,17 +130,11 @@ def check_county(county):
 
 def get_point(number, st_name, county):
     
-    import pyproj
-    from shapely.geometry import Point
+#     import pyproj
+#     from shapely.geometry import Point
     from geopy.geocoders import Nominatim
-    
-    
-    # Create an R-tree index
-#     proj = pyproj.Proj(init="epsg:2263", preserve_units=True)
-    
-    geolocator = Nominatim(user_agent="get_latlon")
-    
-    point = 0
+
+    geolocator = geopy.Nominatim(user_agent="get_latlon")
     
     if (len(number) > 0) & (len(county) > 0):
         address = '{} {}, {}, NY'.format(number, st_name, county)
@@ -150,10 +148,35 @@ def get_point(number, st_name, county):
     location = geolocator.geocode(address)
     
     if location:
+        return (location.longitude, location.latitude)
     
-        point = Point(location.longitude, location.latitude)
+    return None
+
+def get_zipCode(longitude, latitude):
     
-    return point
+    from geopy.geocoders import Nominatim
+    
+    geolocator = Nominatim(user_agent="get_latlon")
+    
+    location = geolocator.reverse((latitude, longitude))
+    
+    zip_code = location.raw['address']['postcode']
+#     county = location.raw['address']['county']
+    
+    return zip_code
+
+def get_county(longitude, latitude):
+    
+    from geopy.geocoders import Nominatim
+    
+    geolocator = Nominatim(user_agent="get_latlon")
+    
+    location = geolocator.reverse((latitude, longitude))
+    
+#     zip_code = location.raw['address']['postcode']
+    county = location.raw['address']['county']
+    
+    return county
 
 def rtree_idx(df):
     
@@ -174,44 +197,79 @@ def rtree_idx(df):
                 
     return (index, df)
 
-def make_polygon(geom):
-    
-    from shapely.geometry import LineString
-    from shapely.geometry import Point
 
-    emp_list = []
+
+def make_bounds(geom):
+
+    lat_list = []
+    lon_list = []
+
+#     emp_list = []
 
     for latlon in geom.strip('MULTILINESTRING ').strip('()').split(', '):
     
         lon, lat = latlon.split(' ')
+#         emp_list.append(float(lon), float(lat))
     
-        lat = float(lat)
-        lon = float(lon)
+        lat_list.append(float(lat)) 
+        lon_list.append(float(lon))
     
-        emp_list.append((lon, lat))
-    
-    if len(emp_list) > 1:
-        emp_list = LineString(emp_list)
-        return emp_list
-    
-    elif len(emp_list) > 0:
-        emp_list = Point(emp_list)
-        return emp_list
+    if len(lon_list) > 0:
+        
+#         return emp_list
+
+        return ((max(lon_list), min(lon_list)), (max(lat_list), min(lat_list)))
         
     else:
-        return 0
+        return None
     
-def find_segment(point, index, df):
+# def find_segment(point, index, df):
     
-    match = index.intersection((point.x, point.y, point.x, point.y))
+#     match = index.intersection((point.x, point.y, point.x, point.y))
     
-    for idx in match:
+#     for idx in match:
         
-        if df.geometry[idx].contains(point):
+#         if df.geometry[idx].contains(point):
             
-            return df['PHYSICALID'][idx]
+#             return df['PHYSICALID'][idx]
         
-    return None
+#     return None
+
+def get_digits(number):
+    
+    import re
+    
+    if number:
+    
+        digits = re.findall(r'\d+', str(number))
+    
+        digits = ''.join(digits)
+    
+        if len(digits) > 0: return digits
+    
+        return 0
+    return 0
+
+def street_bounds(l_low, l_hig, r_low, r_hig):
+
+    
+    if len(l_low) == 0: l_low = (0, 0)
+        
+    if len(l_hig) == 0: l_hig = (0, 0)
+        
+    if len(r_low) == 0: r_low = (0, 0)
+        
+    if len(r_hig) == 0: r_hig = (0, 0)
+        
+    l_low = check_house_number(str(l_low))
+    l_hig = check_house_number(str(l_hig))
+    r_low = check_house_number(str(r_low))
+    r_hig = check_house_number(str(r_hig))
+        
+    l_low = max(l_low, r_low)
+    l_hig = max(l_hig, r_hig)
+    
+    return (l_low, l_hig)
         
 
 def extract_cols(partId, records):
@@ -220,48 +278,55 @@ def extract_cols(partId, records):
         next(records)
         
     import csv
-    import pandas as pd
-    
-    center_dir = 'hdfs:///data/share/bdm/nyc_cscl.csv'
-    
-    df_ct = pd.read_csv(center_dir)
-    
-    df_ct['geometry'] = df_ct['the_geom'].map(make_polygon)
-#     df_ct['BOROCODE'] = df_ct['BOROCODE'].map(check_county)
-    
-    index, df = rtree_idx(df_ct)
+    from datetime import datetime
     
     reader = csv.reader(records)
     
     for row in reader:
         
-        if len(row) == 43:
-        
-            county = row[21].lower()
-            number = str(row[23])
-            year = int(row[4][-4:])
+        if len(row) == 43:   
+            
+#             phy_id = int(row[0])
+            county = check_county(row[21].lower())
+            number = check_house_number(str(row[23]))
+            year = int(datetime.strptime(row[4], '%m/%d/%Y').year)
             st_name = check_name(row[24].lower())
             
-            if year not in [2015, 2016, 2017, 2018, 2019]: 
-                continue
-                
-#             if len(county) == 0:
-#                 index, df = rtree_idx(df_ct) 
-                
+            if year not in [2015, 2016, 2017, 2018, 2019]: continue
 
-            county = check_county(county)
+            if county:
                 
-            point = get_point(number, st_name, county)
+#                 if (type(number[0]) == int) & (type(number[1]) == int) & (type(number) == tuple):
+
+                if type(number) == tuple:
             
-            if point == 0: continue
-            
-            st_int = find_segment(point, index, df)
-            
-            if st_int:
-                yield (st_int, 1)
+                    yield (county, (st_name, number, year))
     
     
-def run_spark(sc, fie_dir):
+def extract_bounds(partID, records):
+    
+    import csv
+    
+    if partID == 0:
+        next(records)
+        
+    reader = csv.reader(records)
+    
+    for row in reader:
+        
+        county = check_county(row[13])
+        
+        if len(county) > 0:
+            phy_id = int(row[0])
+            st_name = check_name(row[28])
+            (l_low, l_hig) = street_bounds(row[1], row[3], row[4], row[5])
+            
+            if (l_hig != l_low) & (type(l_low) == tuple) & (type(l_hig) == tuple):
+        
+                yield (county, (st_name, phy_id, l_low, l_hig))
+    
+    
+def run_spark(parking_violations, center_line):
     
     
 #     parking_violations = sc.textFile(fie_dir)\
@@ -276,9 +341,13 @@ def run_spark(sc, fie_dir):
     
 #     parking_violations = parking_violations.select('year', 'st_numb', 'phy_id', 'l_low', 'l_hig')
     
-    parking_violations = sc.textFile(fie_dir).mapPartitionsWithIndex(extract_cols)\
-                                               .reduceByKey(lambda x,y: x+y)\
-                                               .sortByKey()
+#     parking_violations = sc.textFile(fie_dir).mapPartitionsWithIndex(extract_cols)\
+#                                                .reduceByKey(lambda x,y: x+y)\
+#                                                .sortByKey()
+
+    parking_violations = parking_violations.join(center_line).values()\
+                        .filter(lambda x: (x[0][0] == x[1][0]) & (x[0][1] >= x[1][2]) & (x[0][1] <= x[1][3]))\
+                        .map(lambda x: (x[1][1], x[0][2])).collect()
 
     
     return parking_violations
@@ -295,7 +364,10 @@ if __name__ == '__main__':
     
     sc = SparkContext()
     
-#     center_dir = 'hdfs:///data/share/bdm/nyc_cscl.csv'
+    center_dir = 'hdfs:///data/share/bdm/nyc_cscl.csv'
+    
+    center_line = sc.textFile(center_dir)\
+                .mapPartitionsWithIndex(extract_bounds)
     
 #     center_line = spark.read.load(center_dir, format='csv', header=True, inferSchema=True)
     
@@ -317,19 +389,24 @@ if __name__ == '__main__':
     fie2018_dir = 'hdfs:///data/share/bdm/nyc_parking_violation/2018.csv'
     fie2019_dir = 'hdfs:///data/share/bdm/nyc_parking_violation/2019.csv'
     
-    parking_violations_2015 = run_spark(sc, fie2015_dir)
-    parking_violations_2016 = run_spark(sc, fie2016_dir)
-    parking_violations_2017 = run_spark(sc, fie2017_dir)
-    parking_violations_2018 = run_spark(sc, fie2018_dir)
-    parking_violations_2019 = run_spark(sc, fie2019_dir)
+#     files_list = [fie2015_dir, fie2016_dir, fie2017_dir, fie2018_dir, fie2019_dir]
     
-    parking_violations = parking_violations_2015.join(parking_violations_2016)
-    parking_violations = parking_violations.join(parking_violations_2017)
-    parking_violations = parking_violations.join(parking_violations_2018)
-    parking_violations = parking_violations.join(parking_violations_2019)
+    parking_violations = sc.textFile(fie_dir)\
+                .mapPartitionsWithIndex(extract_cols)
     
-    parking_violations = parking_violations.mapValues(lambda x: (x[0], x[1], x[2], x[3], x[4], 
-                                                                 ((x[4]-x[3]) + (x[3]-x[2]) + (x[2]-x[1]) + (x[1]-x[0]))/4))
+    parking_violations = run_spark(parking_violations, center_line)
+#     parking_violations_2016 = run_spark(sc, fie2016_dir)
+#     parking_violations_2017 = run_spark(sc, fie2017_dir)
+#     parking_violations_2018 = run_spark(sc, fie2018_dir)
+#     parking_violations_2019 = run_spark(sc, fie2019_dir)
+    
+#     parking_violations = parking_violations_2015.join(parking_violations_2016)
+#     parking_violations = parking_violations.join(parking_violations_2017)
+#     parking_violations = parking_violations.join(parking_violations_2018)
+#     parking_violations = parking_violations.join(parking_violations_2019)
+    
+#     parking_violations = parking_violations.mapValues(lambda x: (x[0], x[1], x[2], x[3], x[4], 
+#                                                                  ((x[4]-x[3]) + (x[3]-x[2]) + (x[2]-x[1]) + (x[1]-x[0]))/4))
     
     
     
