@@ -391,7 +391,7 @@ if __name__ == '__main__':
     
 #     files_list = [fie2015_dir, fie2016_dir, fie2017_dir, fie2018_dir, fie2019_dir]
     
-    parking_violations = sc.textFile(fie_dir)\
+    parking_violations = sc.textFile(fie2015_dir)\
                 .mapPartitionsWithIndex(extract_cols)
     
     parking_violations = run_spark(parking_violations, center_line)
