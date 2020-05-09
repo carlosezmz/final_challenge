@@ -225,7 +225,7 @@ def get_phyID(county, st_name, number, center_line):
 
 def extract_cols(partId, records):
     
-    center_dir = '/Users/carlostavarez/Desktop/big_data_challenge/Centerline.csv'
+#     center_dir = '/Users/carlostavarez/Desktop/big_data_challenge/Centerline.csv'
     
     if partId==0:
         next(records)
@@ -233,7 +233,7 @@ def extract_cols(partId, records):
     import csv
     from datetime import datetime
     
-    center_line = get_centerLine(center_dir)
+#     center_line = get_centerLine(center_dir)
     
     reader = csv.reader(records)
     
@@ -252,16 +252,17 @@ def extract_cols(partId, records):
             if county:
                 
                 if (type(number[0]) == int) & (type(number[1]) == int) & (type(number) == tuple):
+                    yield (county, (st_name, number))
 
 #                 if type(number) == tuple:
                     
 #                     yield (county, st_name, number)
                     
-                    phy_id = get_phyID(county, st_name, number, center_line)
+#                     phy_id = get_phyID(county, st_name, number, center_line)
                 
-                    if phy_id:
+#                     if phy_id:
             
-                        yield (phy_id, 1)
+#                         yield (county, st_name, number)
     
     
 def extract_bounds(partID, records):
@@ -284,7 +285,7 @@ def extract_bounds(partID, records):
             
             if (l_hig != l_low) & (type(l_low) == tuple) & (type(l_hig) == tuple):
         
-                yield (county, st_name, phy_id, l_low, l_hig)
+                yield (county, (st_name, phy_id, l_low, l_hig))
     
     
 def run_spark(sc, fie2015_dir):
@@ -330,7 +331,12 @@ def conver_csv(_, records):
             
 if __name__ == '__main__':
     
+     center_dir = '/Users/carlostavarez/Desktop/big_data_challenge/Centerline.csv'
+    
     sc = SparkContext()
+    
+    center_line = sc.textFile(center_dir)\
+                    .mapPartitionsWithIndex(extract_bounds).cahche()
     
 #     center_line = spark.read.load(center_dir, format='csv', header=True, inferSchema=True)
     
@@ -352,16 +358,21 @@ if __name__ == '__main__':
     fie2018_dir = 'hdfs:///data/share/bdm/nyc_parking_violation/2018.csv'
     fie2019_dir = 'hdfs:///data/share/bdm/nyc_parking_violation/2019.csv'
     
-#     parking_violations = sc.textFile(fie2015_dir)\
-#                            .mapPartitionsWithIndex(extract_cols)\
+    parking_violations = sc.textFile(fie2015_dir)\
+                           .mapPartitionsWithIndex(extract_cols)\
 #                            .reduceByKey(lambda x,y: x+y)\
 #                            .sortByKey()
 #                            .cache()
     
+    parking_violations = parking_violations.join(center_line).values()\
+                        .filter(lambda x: (x[0][0] == x[1][0]) & (x[0][1] >= x[1][2]) & (x[0][1] <= x[1][3]))\
+                        .map(lambda x: (x[1][1], 1))\
+                        .reduceByKey(lambda x,y: x+y).sortByKey().cache()
+    
 #     files_list = [fie2015_dir, fie2016_dir, fie2017_dir, fie2018_dir, fie2019_dir]
     
     
-    parking_violations = run_spark(sc, fie2015_dir)
+#     parking_violations = run_spark(sc, fie2015_dir)
 #     parking_violations_2016 = run_spark(sc, fie2016_dir)
 #     parking_violations_2017 = run_spark(sc, fie2017_dir)
 #     parking_violations_2018 = run_spark(sc, fie2018_dir)
