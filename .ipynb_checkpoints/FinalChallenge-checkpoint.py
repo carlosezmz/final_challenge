@@ -331,7 +331,7 @@ def conver_csv(_, records):
             
 if __name__ == '__main__':
     
-     center_dir = '/Users/carlostavarez/Desktop/big_data_challenge/Centerline.csv'
+    center_dir = 'hdfs:///data/share/bdm/nyc_cscl.csv'
     
     sc = SparkContext()
     
