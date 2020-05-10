@@ -337,7 +337,7 @@ if __name__ == '__main__':
     sc = SparkContext()
     
     center_line = sc.textFile(center_dir)\
-                    .mapPartitionsWithIndex(extract_bounds)
+                    .mapPartitionsWithIndex(extract_bounds).cahce()
     
 #     center_line = spark.read.load(center_dir, format='csv', header=True, inferSchema=True)
     
@@ -365,7 +365,7 @@ if __name__ == '__main__':
 #                            .sortByKey()
 #                            .cache()
     
-    parking_violations = parking_violations.join(center_line).values()\
+#     parking_violations = parking_violations.join(center_line).values()\
 #                         .filter(lambda x: (x[0][0] == x[1][0]) & (x[0][1] >= x[1][2]) & (x[0][1] <= x[1][3]))\
 #                         .map(lambda x: (x[1][1], 1))\
 #                         .reduceByKey(lambda x,y: x+y).sortByKey()
