@@ -57,7 +57,7 @@ def check_name(st_name):
 def check_house_number(number):
     
     if len(number) == 0:
-        number = 0
+        number = (0, 0)
     
     elif (len(number) > 0) and (type(number) != list):
         
@@ -111,13 +111,13 @@ def check_county(county):
         'k': 'brooklyn', 'ki':'brooklyn', 'bk':'brooklyn', '3':'brooklyn',
         'q': 'queens', 'qn':'queens', 'qu':'queens', '4':'queens',
         'r': 'staten island', 's':'staten island', 'st':'staten island', 
-            '5':'staten island', 'ri':'staten island'
+            '5':'staten island', 'ri':'staten island', '00':'', 'pb':''
                 }
     try:
         if len(county) > 2:
             county = boro_dict[county[:2]]
             
-        elif len(county) <= 2 and len(county) > 0:
+        elif (len(county) <= 2) & (len(county) > 0):
             county = boro_dict[county]
         
     except ValueError:
@@ -209,23 +209,27 @@ def street_bounds(l_low, l_hig, r_low, r_hig):
     
 #     return center_line
 
-def get_phyID(county, st_name, number, center_line):
+def get_phyID(county, st_name, number, df):
     
-    phy_id = center_line[(center_line['county'] == county)\
-                        & (center_line['st_name']== st_name)\
-                        & (center_line['min_bound'] <= number)\
-                        & (center_line['max_ bound'] >= number)]
+    
+    
+    phy_id = df[(df['county'] == county)\
+              & (df['st_name']== st_name)\
+              & (df['l_low'] <= number)\
+              & (df['l_hig'] >= number)]
     
 
     if phy_id.shape[0] > 0:
-        return phy_id['number'][0]
+        
+        if type(phy_id['phy_id'][0]) == int:
+            return phy_id['phy_id'][0]
     else:
         return None
         
 
 def extract_cols(partId, records):
     
-#     center_dir = '/Users/carlostavarez/Desktop/big_data_challenge/Centerline.csv'
+    center_dir = 'nyc_cscl.csv'
     
     if partId==0:
         next(records)
@@ -233,13 +237,13 @@ def extract_cols(partId, records):
     import csv
     from datetime import datetime
     
-#     center_line = get_centerLine(center_dir)
+    center_line = extract_bounds(records)
     
     reader = csv.reader(records)
     
     for row in reader:
         
-        if len(row) == 43:   
+        if len(row) == 43:  
             
 #             phy_id = int(row[0])
             county = check_county(row[21].lower())
@@ -249,78 +253,106 @@ def extract_cols(partId, records):
             
             if year not in [2015, 2016, 2017, 2018, 2019]: continue
 
-            if county:
+            if county in ['staten island', 'new york', 'bronx', 'brooklyn', 'queens']:
                 
-#                 if (type(number[0]) == int) & (type(number[1]) == int) & (type(number) == tuple):
-                    
+                if (type(number[0]) == int) & (type(number[1]) == int) & (type(number) == tuple):
 
-                if type(number) == tuple:
-                    yield (county, (st_name, number))
+#                 if type(number) == tuple:
+#                     yield (county, st_name, number)
                     
 #                     yield (county, st_name, number)
                     
 #                     phy_id = get_phyID(county, st_name, number, center_line)
-                
-#                     if phy_id:
+        
+#                     if county in df['county'].unique():
             
-#                         yield (county, st_name, number)
+                    if st_name in center_line[county].keys():
+            
+                        for idx, segment in enumerate(center_line[county][st_name]['bounds']):
+                    
+                            if (number >= segment[0]) & (number <= segment[1]):
+                            
+                                phy_id = center_line[county][st_name]['phy_id'][idx]
+            
+                
+                                if type(phy_id) == int:
+                        
+                                    year_dict = {2015:0, 2016:0, 2017:0, 2018:0, 2019:0}
+                        
+                                    year_dict[year] = 1
+                            
+                                    year_t = (year_dict[2015], year_dict[2016], year_dict[2017], year_dict[2018], 
+                                              year_dict[2019])
+            
+                                    yield (phy_id, str(row[0]), year_t)
     
     
-def extract_bounds(partID, records):
+    
+def extract_bounds(records):
     
     import csv
     
-    if partID == 0:
-        next(records)
+    empty_dict = {}
         
-    reader = csv.reader(records)
+    with open(center_dir) as csv_file:
     
-    for row in reader:
+        reader = csv.reader(csv_file)
+
+        for idx, row in enumerate(reader):
         
-        county = check_county(row[13])
-        
-        if len(county) > 0:
-            phy_id = int(row[0])
-            st_name = check_name(row[28])
-            (l_low, l_hig) = street_bounds(row[1], row[3], row[4], row[5])
+            if idx == 0: continue
             
-            if (l_hig != l_low) & (type(l_low) == tuple) & (type(l_hig) == tuple):
+            county = check_county(row[13])
         
-                yield (county, (st_name, phy_id, l_low, l_hig))
-    
-    
-def run_spark(sc, fie2015_dir):
-    
-    parking_violations = sc.textFile(fie2015_dir)\
-                           .mapPartitionsWithIndex(extract_cols)\
-                           .reduceByKey(lambda x,y: x+y)\
-                           .sortByKey()\
-                           .cache()
-    
-    
-#     parking_violations = sc.textFile(fie_dir)\
-#                            .mapPartitionsWithIndex(extract_cols)
-    
-#     parking_violations = spark.createDataFrame(parking_violations, schema=['boro', 'st_name', 'year', 'st_numb'])
-    
-    
-#     parking_violations = parking_violations.join(center_line, 
-#                         [parking_violations.boro == center_line.boro, parking_violations.st_name == center_line.st_name], 
-#                         'inner')
-    
-#     parking_violations = parking_violations.select('year', 'st_numb', 'phy_id', 'l_low', 'l_hig')
-    
-#     parking_violations = sc.textFile(fie_dir).mapPartitionsWithIndex(extract_cols)\
-#                                                .reduceByKey(lambda x,y: x+y)\
-#                                                .sortByKey()
+            if county in ['staten island', 'new york', 'bronx', 'brooklyn', 'queens']:
+                phy_id = int(row[0])
+                st_name = check_name(row[28])
+                (l_low, l_hig) = street_bounds(row[1], row[3], row[4], row[5])
+            
+                if (l_hig != l_low) & (type(l_low) == tuple) & (type(l_hig) == tuple):
+                    
+#                     if county not in empty_dict.keys():
+                    
+                    empty_dict[county] = empty_dict.get(county, {})
+                    
+                    if st_name not in empty_dict[county].keys():
+                        empty_dict[county][st_name] = {'bounds' : [(l_low, l_hig)], 'phy_id':[phy_id]}
+#                         empty_dict[county][st_name]['phy_id'] = [phy_id]
+                        
+                    else:
+                    
+                        empty_dict[county][st_name]['bounds'].append((l_low, l_hig))
+                    
+                        empty_dict[county][st_name]['phy_id'].append(phy_id)
+        
+#                     yield (county, st_name, phy_id, l_low, l_hig)
+    return empty_dict
+            
+            
 
-#     parking_violations = parking_violations.join(center_line).values()\
-#                         .filter(lambda x: (x[0][0] == x[1][0]) & (x[0][1] >= x[1][2]) & (x[0][1] <= x[1][3]))\
-#                         .map(lambda x: (x[1][1], 1))\
-#                         .reduceByKey(lambda x,y: x+y).sortByKey().cache()
-
+def rdd_union(sc, files_list):
     
-    return parking_violations
+    for idx, file in enumerate(files_list):
+        
+        if idx == 0:
+            
+            rdd = sc.textFile(file).mapPartitionsWithIndex(extract_cols)
+            
+            rdds = rdd
+            
+        else:
+            
+            rdd = sc.textFile(file).mapPartitionsWithIndex(extract_cols)
+            
+            rdds = rdds.union(rdd)
+            
+    rdds = rdds.distinct()
+            
+    rdds = rdds.map(lambda x: (x[0], x[2]))
+
+            
+    return rdds
+    
  
     
 def conver_csv(_, records):
@@ -332,26 +364,8 @@ def conver_csv(_, records):
             
 if __name__ == '__main__':
     
-    center_dir = 'hdfs:///data/share/bdm/nyc_cscl.csv'
-    
     sc = SparkContext()
-    
-    center_line = sc.textFile(center_dir)\
-                    .mapPartitionsWithIndex(extract_bounds).cahce()
-    
-#     center_line = spark.read.load(center_dir, format='csv', header=True, inferSchema=True)
-    
-#     center_line = center_line.select(
-#     center_line['PHYSICALID'].alias('phy_id'),
-#     center_line['L_LOW_HN'].alias('l_low'),
-#     center_line['L_HIGH_HN'].alias('l_hig'),
-#     center_line['BOROCODE'].cast('int').alias('boro'),
-#     center_line['FULL_STREE'].alias('st_name'))
-    
-#     center_line = center_line.filter((center_line['l_low'].isNotNull())\
-#                                      & (center_line['l_hig'].isNotNull())\
-#                                      & (center_line['boro'].isNotNull())\
-#                                      & (center_line['st_name'].isNotNull()))
+
     
     fie2015_dir = 'hdfs:///data/share/bdm/nyc_parking_violation/2015.csv'
     fie2016_dir = 'hdfs:///data/share/bdm/nyc_parking_violation/2016.csv'
@@ -359,35 +373,16 @@ if __name__ == '__main__':
     fie2018_dir = 'hdfs:///data/share/bdm/nyc_parking_violation/2018.csv'
     fie2019_dir = 'hdfs:///data/share/bdm/nyc_parking_violation/2019.csv'
     
-    parking_violations = sc.textFile(fie2015_dir)\
-                           .mapPartitionsWithIndex(extract_cols)
-#                            .reduceByKey(lambda x,y: x+y)\
-#                            .sortByKey()
-#                            .cache()
+    files_list = [fie_dir2015, fie_dir2016, fie_dir2017, fie_dir2018, fie_dir2019]
     
-#     parking_violations = parking_violations.join(center_line).values()\
-#                         .filter(lambda x: (x[0][0] == x[1][0]) & (x[0][1] >= x[1][2]) & (x[0][1] <= x[1][3]))\
-#                         .map(lambda x: (x[1][1], 1))\
-#                         .reduceByKey(lambda x,y: x+y).sortByKey()
+    parking_violations = rdd_union(sc, files_list)
     
-#     files_list = [fie2015_dir, fie2016_dir, fie2017_dir, fie2018_dir, fie2019_dir]
+    parking_violations = parking_violations.reduceByKey(lambda x,y: (x[0]+y[0], x[1]+y[1], x[2]+y[2], x[3]+y[3], x[4]+y[4]))\
+                                           .mapValues(lambda x: (x[0], x[1], x[2], x[3], x[4], 
+                                                                 ((x[4] - x[3]) + (x[3] - x[2]) + (x[2] - x[1]) + (x[1] - x[0]))/4))\
+                                           .sortByKey()
     
-    
-#     parking_violations = run_spark(sc, fie2015_dir)
-#     parking_violations_2016 = run_spark(sc, fie2016_dir)
-#     parking_violations_2017 = run_spark(sc, fie2017_dir)
-#     parking_violations_2018 = run_spark(sc, fie2018_dir)
-#     parking_violations_2019 = run_spark(sc, fie2019_dir)
-    
-#     parking_violations = parking_violations_2015.join(parking_violations_2016)
-#     parking_violations = parking_violations.join(parking_violations_2017)
-#     parking_violations = parking_violations.join(parking_violations_2018)
-#     parking_violations = parking_violations.join(parking_violations_2019)
-    
-#     parking_violations = parking_violations.mapValues(lambda x: (x[0], x[1], x[2], x[3], x[4], 
-#                                                                  ((x[4]-x[3]) + (x[3]-x[2]) + (x[2]-x[1]) + (x[1]-x[0]))/4))
-    
-    
+
     
     parking_violations.saveAsTextFile('Violations')
 
