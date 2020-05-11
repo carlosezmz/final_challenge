@@ -356,7 +356,7 @@ def rdd_union(sc, files_list):
             
     rdds = rdds.distinct()
             
-    rdds = rdds.map(lambda x: (x[0], x[2]))
+#     rdds = rdds.map(lambda x: (x[0], x[2]))
 
             
     return rdds
