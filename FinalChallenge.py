@@ -385,7 +385,7 @@ def conver_csv(_, records):
     
     for phy_id, count in records:
             
-        yield ','.join((str(phy_id), str(count[0]), str(count[1]), str(count[2]), str(count[3]), str(count[4]), str(count[5])))   
+        yield ','.join((str(phy_id), str(count[0]), str(count[1]), str(count[2]), str(count[3]), str(count[4])))   
         
             
 if __name__ == '__main__':
@@ -422,5 +422,5 @@ if __name__ == '__main__':
     
 
     
-    parking_violations.mapPartitionsWithIndex(conver_csv).saveAsTextFile('Violations')
+    parking_violations.saveAsTextFile('Violations')
 
