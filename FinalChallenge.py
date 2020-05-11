@@ -340,6 +340,14 @@ def extract_bounds(partID, records):
 
 def rdd_union(sc, files_list):
     
+    from pyspark import SparkContext
+    
+    sc = SparkContext()
+    
+    center_dir = '/data/share/bdm/nyc_cscl.csv'
+    
+    bounds = sc.textFile(center_dir).mapPartitionsWithIndex(extract_bounds)
+    
     for idx, file in enumerate(files_list):
         
         if idx == 0:
@@ -354,12 +362,21 @@ def rdd_union(sc, files_list):
             
             rdds = rdds.union(rdd)
             
-    rdds = rdds.distinct()
+#     rdds = rdds.distinct()
+    
+    rdds.distinct().join(bounds).values()\
+               .mapPartitionsWithIndex(get_id)\
+               .reduceByKey(lambda x,y: (x[0]+y[0], x[1]+y[1], x[2]+y[2], x[3]+y[3], x[4]+y[4]))\
+               .mapValues(lambda x: (x[0],x[1],x[2],x[3],x[4],((x[4]-x[3])+(x[3]-x[2])+(x[2]-x[1])+(x[1]-x[0]))/4))\
+               .sortByKey()\
+               .saveAsTextFile('Violations')
+    
+#     rdds.saveAsTextFile('Violations')
             
 #     rdds = rdds.map(lambda x: (x[0], x[2]))
 
             
-    return rdds.cache()
+#     return rdds
 
 def get_id(partID, records):
     
@@ -404,23 +421,23 @@ if __name__ == '__main__':
     
 #     parking_violations = rdd_union(sc, files_list).collect()
     
-    bounds = sc.textFile(center_dir).mapPartitionsWithIndex(extract_bounds)
+#     bounds = sc.textFile(center_dir).mapPartitionsWithIndex(extract_bounds)
     
     parking_violations = rdd_union(sc, files_list)
     
-    parking_violations = parking_violations.join(bounds)\
-                                           .values()\
-                                           .mapPartitionsWithIndex(get_id)\
-                                           .reduceByKey(lambda x,y: (x[0]+y[0], x[1]+y[1], x[2]+y[2], x[3]+y[3], x[4]+y[4]))\
-                                           .mapValues(lambda x: (x[0],x[1],x[2],x[3],x[4],((x[4]-x[3])+(x[3]-x[2])+(x[2]-x[1])+(x[1]-x[0]))/4))\
-                                           .sortByKey().cache()
-    
-#     parking_violations = parking_violations.reduceByKey(lambda x,y: (x[0]+y[0], x[1]+y[1], x[2]+y[2], x[3]+y[3], x[4]+y[4]))\
-#                                            .mapValues(lambda x: (x[0], x[1], x[2], x[3], x[4], 
-#                                                                  ((x[4] - x[3]) + (x[3] - x[2]) + (x[2] - x[1]) + (x[1] - x[0]))/4))\
+#     parking_violations = parking_violations.join(bounds)\
+#                                            .values()\
+#                                            .mapPartitionsWithIndex(get_id)\
+#                                            .reduceByKey(lambda x,y: (x[0]+y[0], x[1]+y[1], x[2]+y[2], x[3]+y[3], x[4]+y[4]))\
+#                                            .mapValues(lambda x: (x[0],x[1],x[2],x[3],x[4],((x[4]-x[3])+(x[3]-x[2])+(x[2]-x[1])+(x[1]-x[0]))/4))\
 #                                            .sortByKey()
+    
+# #     parking_violations = parking_violations.reduceByKey(lambda x,y: (x[0]+y[0], x[1]+y[1], x[2]+y[2], x[3]+y[3], x[4]+y[4]))\
+# #                                            .mapValues(lambda x: (x[0], x[1], x[2], x[3], x[4], 
+# #                                                                  ((x[4] - x[3]) + (x[3] - x[2]) + (x[2] - x[1]) + (x[1] - x[0]))/4))\
+# #                                            .sortByKey()
     
 
     
-    parking_violations.saveAsTextFile('Violations')
+#     parking_violations.saveAsTextFile('Violations')
 
