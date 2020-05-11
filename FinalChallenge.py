@@ -340,9 +340,9 @@ def extract_bounds(partID, records):
 
 def rdd_union(sc, files_list):
     
-    from pyspark import SparkContext
+#     from pyspark import SparkContext
     
-    sc = SparkContext()
+#     sc = SparkContext()
     
     center_dir = '/data/share/bdm/nyc_cscl.csv'
     
