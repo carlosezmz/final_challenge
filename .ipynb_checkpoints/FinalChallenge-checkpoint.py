@@ -229,7 +229,6 @@ def get_phyID(county, st_name, number, df):
 
 def extract_cols(partId, records):
     
-    center_dir = 'nyc_cscl.csv'
     
     if partId==0:
         next(records)
@@ -237,11 +236,11 @@ def extract_cols(partId, records):
     import csv
     from datetime import datetime
     
-    center_line = extract_bounds(center_dir)
+    center_line = extract_bounds('/user/ctavare003/nyc_cscl.csv')
     
     reader = csv.reader(records)
     
-    for row in reader:
+    for row in reader: 
         
         if len(row) == 43:  
             
