@@ -344,13 +344,13 @@ def rdd_union(sc, files_list):
         
         if idx == 0:
             
-            rdd = sc.textFile(file).mapPartitionsWithIndex(extract_cols)
+            rdd = sc.textFile(file).mapPartitionsWithIndex(extract_cols).cache()
             
             rdds = rdd
             
         else:
             
-            rdd = sc.textFile(file).mapPartitionsWithIndex(extract_cols)
+            rdd = sc.textFile(file).mapPartitionsWithIndex(extract_cols).cache()
             
             rdds = rdds.union(rdd)
             
