@@ -348,7 +348,7 @@ def rdd_union(sc, files_list):
     
     bounds = sc.textFile(center_dir).mapPartitionsWithIndex(extract_bounds).collect()
     
-    bounds = sc.partallelize(bounds)
+    bounds = sc.parallelize(bounds)
     
     for idx, file in enumerate(files_list):
         
