@@ -235,8 +235,13 @@ def extract_cols(partId, records):
         
     import csv
     from datetime import datetime
+    from pyspark import SparkContext
     
-    center_line = extract_bounds('/user/ctavare003/nyc_cscl.csv')
+    sc = SparkContext()
+
+    center_line = sc.textFile('/data/share/bdm/nyc_cscl.csv')\
+                    .mapPartitionsWithIndex(extract_bounds)\
+                    .collect()
     
     reader = csv.reader(records)
     
@@ -287,42 +292,45 @@ def extract_cols(partId, records):
     
     
     
-def extract_bounds(records):
+def extract_bounds(partID, records):
+    
+    if partID == 0:
+        next(records)
     
     import csv
     
     empty_dict = {}
         
-    with open(records) as csv_file:
+#     with open(records) as csv_file:
     
-        reader = csv.reader(csv_file)
+    reader = csv.reader(csv_file)
 
-        for idx, row in enumerate(reader):
+    for row in reader:
         
-            if idx == 0: continue
+#         if idx == 0: continue
             
-            county = check_county(row[13])
+        county = check_county(row[13])
         
-            if county in ['staten island', 'new york', 'bronx', 'brooklyn', 'queens']:
-                phy_id = int(row[0])
-                st_name = check_name(row[28])
-                (l_low, l_hig) = street_bounds(row[1], row[3], row[4], row[5])
+        if county in ['staten island', 'new york', 'bronx', 'brooklyn', 'queens']:
+            phy_id = int(row[0])
+            st_name = check_name(row[28])
+            (l_low, l_hig) = street_bounds(row[1], row[3], row[4], row[5])
             
-                if (l_hig != l_low) & (type(l_low) == tuple) & (type(l_hig) == tuple):
+            if (l_hig != l_low) & (type(l_low) == tuple) & (type(l_hig) == tuple):
                     
 #                     if county not in empty_dict.keys():
                     
-                    empty_dict[county] = empty_dict.get(county, {})
+                empty_dict[county] = empty_dict.get(county, {})
                     
-                    if st_name not in empty_dict[county].keys():
-                        empty_dict[county][st_name] = {'bounds' : [(l_low, l_hig)], 'phy_id':[phy_id]}
+                if st_name not in empty_dict[county].keys():
+                    empty_dict[county][st_name] = {'bounds' : [(l_low, l_hig)], 'phy_id':[phy_id]}
 #                         empty_dict[county][st_name]['phy_id'] = [phy_id]
                         
-                    else:
+                else:
                     
-                        empty_dict[county][st_name]['bounds'].append((l_low, l_hig))
+                    empty_dict[county][st_name]['bounds'].append((l_low, l_hig))
                     
-                        empty_dict[county][st_name]['phy_id'].append(phy_id)
+                    empty_dict[county][st_name]['phy_id'].append(phy_id)
         
 #                     yield (county, st_name, phy_id, l_low, l_hig)
     return empty_dict
@@ -366,11 +374,11 @@ if __name__ == '__main__':
     sc = SparkContext()
 
     
-    fie2015_dir = 'hdfs:///data/share/bdm/nyc_parking_violation/2015.csv'
-    fie2016_dir = 'hdfs:///data/share/bdm/nyc_parking_violation/2016.csv'
-    fie2017_dir = 'hdfs:///data/share/bdm/nyc_parking_violation/2017.csv'
-    fie2018_dir = 'hdfs:///data/share/bdm/nyc_parking_violation/2018.csv'
-    fie2019_dir = 'hdfs:///data/share/bdm/nyc_parking_violation/2019.csv'
+    fie2015_dir = '/data/share/bdm/nyc_parking_violation/2015.csv'
+    fie2016_dir = '/data/share/bdm/nyc_parking_violation/2016.csv'
+    fie2017_dir = '/data/share/bdm/nyc_parking_violation/2017.csv'
+    fie2018_dir = '/data/share/bdm/nyc_parking_violation/2018.csv'
+    fie2019_dir = '/data/share/bdm/nyc_parking_violation/2019.csv'
     
     files_list = [fie2015_dir, fie2016_dir, fie2017_dir, fie2018_dir, fie2019_dir]
     
