@@ -344,13 +344,13 @@ def rdd_union(sc, files_list):
         
         if idx == 0:
             
-            rdd = sc.textFile(file).mapPartitionsWithIndex(extract_cols).cache()
+            rdd = sc.textFile(file).mapPartitionsWithIndex(extract_cols)
             
             rdds = rdd
             
         else:
             
-            rdd = sc.textFile(file).mapPartitionsWithIndex(extract_cols).cache()
+            rdd = sc.textFile(file).mapPartitionsWithIndex(extract_cols)
             
             rdds = rdds.union(rdd)
             
@@ -359,7 +359,7 @@ def rdd_union(sc, files_list):
 #     rdds = rdds.map(lambda x: (x[0], x[2]))
 
             
-    return rdds
+    return rdds.cache()
 
 def get_id(partID, records):
     
@@ -402,9 +402,11 @@ if __name__ == '__main__':
     
     files_list = [fie2015_dir, fie2016_dir, fie2017_dir, fie2018_dir, fie2019_dir]
     
-    parking_violations = rdd_union(sc, files_list).cache()
+#     parking_violations = rdd_union(sc, files_list).cache()
     
     bounds = sc.textFile(center_dir).mapPartitionsWithIndex(extract_bounds).cache()
+    
+    parking_violations = rdd_union(sc, files_list)
     
     parking_violations = parking_violations.join(bounds)\
                                            .values()\
