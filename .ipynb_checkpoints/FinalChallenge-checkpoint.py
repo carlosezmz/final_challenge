@@ -383,11 +383,35 @@ def get_id(partID, records):
     
 def conver_csv(_, records):
     
-    for phy_id, x in records:
+    old_phy_id = None
+    current_phy_id = None
+    x = 0
+    
+    for phy_id, values in records:
         
-        rate = ((x[4]-x[3])+(x[3]-x[2])+(x[2]-x[1])+(x[1]-x[0]))/4
+#         x = (0, 0, 0, 0)
+        
+        if (phy_id != current_phy_id) & (current_phy_id == None):
             
-        yield ','.join((str(phy_id), str(x[0]), str(x[1]), str(x[2]), str(x[3]), str(x[4]), str(rate)))   
+            current_phy_id = phy_id
+            x = values
+            
+        elif (phy_id == current_phy_id):
+            
+            x[0] += values[0]
+            x[1] += values[1]
+            x[2] += values[2]
+            x[3] += values[3]
+            x[4] += values[4]
+            
+        else:
+            
+            old_phy_id = current_phy_id
+            current_phy_id = phy_id
+            
+            rate = ((x[4]-x[3])+(x[3]-x[2])+(x[2]-x[1])+(x[1]-x[0]))/4
+            
+            yield ', '.join((str(phy_id), str(x[0]), str(x[1]), str(x[2]), str(x[3]), str(x[4]), str(rate)))   
         
             
 if __name__ == '__main__':
@@ -412,46 +436,45 @@ if __name__ == '__main__':
     
 #     parking_violations = rdd_union(sc, files_list)
 
+    parking_violations_list = []
+    
     for idx, file in enumerate(files_list):
         
         year = int(file[-8:-4])
         
-        if idx == 0:
             
-            rdd = sc.textFile(file)\
-                    .mapPartitionsWithIndex(extract_cols)\
-                    .filter(lambda x: x[1][3] == year).cache()
+        rdd = sc.textFile(file)\
+                .mapPartitionsWithIndex(extract_cols)\
+                .filter(lambda x: x[1][3] == year).cache()
             
-            rdd = rdd.join(bounds)\
-                     .values()\
-                     .mapPartitionsWithIndex(get_id).cache()
+        rdd = rdd.join(bounds)\
+                 .values()\
+                 .mapPartitionsWithIndex(get_id).collect()
 #                      .reduceByKey(lambda x,y: (x[0]+y[0], x[1]+y[1], x[2]+y[2], x[3]+y[3], x[4]+y[4]))\
 #                      .sortByKey().cache()
             
-            parking_violations = rdd
+        parking_violations_list += rdd
             
-        else:
+#         else:
             
-            rdd = sc.textFile(file)\
-                    .mapPartitionsWithIndex(extract_cols)\
-                    .filter(lambda x: x[1][3] == year).cache()
+#             rdd = sc.textFile(file)\
+#                     .mapPartitionsWithIndex(extract_cols)\
+#                     .filter(lambda x: x[1][3] == year).cache()
             
-            rdd = rdd.join(bounds)\
-                     .values()\
-                     .mapPartitionsWithIndex(get_id).cache()
-#                      .reduceByKey(lambda x,y: (x[0]+y[0], x[1]+y[1], x[2]+y[2], x[3]+y[3], x[4]+y[4]))\
-#                      .sortByKey().cache()
+#             rdd = rdd.join(bounds)\
+#                      .values()\
+#                      .mapPartitionsWithIndex(get_id).sortByKey().collect()
+# #                      .reduceByKey(lambda x,y: (x[0]+y[0], x[1]+y[1], x[2]+y[2], x[3]+y[3], x[4]+y[4]))\
+# #                      .sortByKey().cache()
             
             
-            parking_violations = parking_violations.union(rdd).cache()
+#             parking_violations = parking_violations.union(rdd).cache()
             
     
 #     parking_violations = parking_violations.distinct().cache()
     
-    parking_violations = parking_violations.reduceByKey(lambda x,y: (x[0]+y[0], x[1]+y[1], x[2]+y[2], x[3]+y[3], x[4]+y[4]))\
-                                           .sortByKey().cache()
-    
-#     parking_violations = parking_violations.reduceByKey(lambda x,y: (x[0]+y[0], x[1]+y[1], x[2]+y[2], x[3]+y[3], x[4]+y[4]))\
+    parking_violations = sc.parallelize(parking_violations_list).sortByKey().cache()
+#     .reduceByKey(lambda x,y: (x[0]+y[0], x[1]+y[1], x[2]+y[2], x[3]+y[3], x[4]+y[4]))\
 #                                            .mapValues(lambda x: (x[0], x[1], x[2], x[3], x[4], 
 #                                                                  ((x[4] - x[3]) + (x[3] - x[2]) + (x[2] - x[1]) + (x[1] - x[0]))/4))\
 #                                            .sortByKey()
