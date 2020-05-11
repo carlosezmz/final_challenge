@@ -237,7 +237,7 @@ def extract_cols(partId, records):
     import csv
     from datetime import datetime
     
-    center_line = extract_bounds(records)
+    center_line = extract_bounds(center_dir)
     
     reader = csv.reader(records)
     
@@ -294,7 +294,7 @@ def extract_bounds(records):
     
     empty_dict = {}
         
-    with open(center_dir) as csv_file:
+    with open(records) as csv_file:
     
         reader = csv.reader(csv_file)
 
