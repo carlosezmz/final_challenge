@@ -385,7 +385,7 @@ def conver_csv(_, records):
     
     for phy_id, count in records:
             
-        yield ','.join((str(phy_id), str(count[0]), str(count[1]), str(count[2]), str(count[3]), str(count[4])))   
+        yield ','.join((str(phy_id), str(count[0]), str(count[1]), str(count[2]), str(count[3]), str(count[4]), str(count[5])))   
         
             
 if __name__ == '__main__':
@@ -402,18 +402,18 @@ if __name__ == '__main__':
     
     files_list = [fie2015_dir, fie2016_dir, fie2017_dir, fie2018_dir, fie2019_dir]
     
-#     parking_violations = rdd_union(sc, files_list).cache()
+#     parking_violations = rdd_union(sc, files_list).collect()
     
-#     bounds = sc.textFile(center_dir).mapPartitionsWithIndex(extract_bounds).cache()
+    bounds = sc.textFile(center_dir).mapPartitionsWithIndex(extract_bounds).collect()
     
     parking_violations = rdd_union(sc, files_list)
     
-#     parking_violations = parking_violations.join(bounds)\
-#                                            .values()\
-#                                            .mapPartitionsWithIndex(get_id)\
-#                                            .reduceByKey(lambda x,y: (x[0]+y[0], x[1]+y[1], x[2]+y[2], x[3]+y[3], x[4]+y[4]))\
-#                                            .mapValues(lambda x: (x[0],x[1],x[2],x[3],x[4],((x[4]-x[3])+(x[3]-x[2])+(x[2]-x[1])+(x[1]-x[0]))/4))\
-#                                            .sortByKey().cache()
+    parking_violations = parking_violations.join(bounds)\
+                                           .values()\
+                                           .mapPartitionsWithIndex(get_id)\
+                                           .reduceByKey(lambda x,y: (x[0]+y[0], x[1]+y[1], x[2]+y[2], x[3]+y[3], x[4]+y[4]))\
+                                           .mapValues(lambda x: (x[0],x[1],x[2],x[3],x[4],((x[4]-x[3])+(x[3]-x[2])+(x[2]-x[1])+(x[1]-x[0]))/4))\
+                                           .sortByKey().cache()
     
 #     parking_violations = parking_violations.reduceByKey(lambda x,y: (x[0]+y[0], x[1]+y[1], x[2]+y[2], x[3]+y[3], x[4]+y[4]))\
 #                                            .mapValues(lambda x: (x[0], x[1], x[2], x[3], x[4], 
