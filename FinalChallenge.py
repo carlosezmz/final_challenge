@@ -449,8 +449,8 @@ if __name__ == '__main__':
             
         rdd = rdd.join(bounds)\
                  .values()\
-                 .mapPartitionsWithIndex(get_id).cache()
-#                      .reduceByKey(lambda x,y: (x[0]+y[0], x[1]+y[1], x[2]+y[2], x[3]+y[3], x[4]+y[4]))\
+                 .mapPartitionsWithIndex(get_id)\
+                     .reduceByKey(lambda x,y: (x[0]+y[0], x[1]+y[1], x[2]+y[2], x[3]+y[3], x[4]+y[4]))\
 #                      .sortByKey().cache()
             
         parking_violations_list += [rdd]
