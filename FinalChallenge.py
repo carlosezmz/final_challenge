@@ -404,16 +404,16 @@ if __name__ == '__main__':
     
 #     parking_violations = rdd_union(sc, files_list).cache()
     
-    bounds = sc.textFile(center_dir).mapPartitionsWithIndex(extract_bounds).cache()
+#     bounds = sc.textFile(center_dir).mapPartitionsWithIndex(extract_bounds).cache()
     
     parking_violations = rdd_union(sc, files_list)
     
-    parking_violations = parking_violations.join(bounds)\
-                                           .values()\
-                                           .mapPartitionsWithIndex(get_id)\
-                                           .reduceByKey(lambda x,y: (x[0]+y[0], x[1]+y[1], x[2]+y[2], x[3]+y[3], x[4]+y[4]))\
-                                           .mapValues(lambda x: (x[0],x[1],x[2],x[3],x[4],((x[4]-x[3])+(x[3]-x[2])+(x[2]-x[1])+(x[1]-x[0]))/4))\
-                                           .sortByKey().cache()
+#     parking_violations = parking_violations.join(bounds)\
+#                                            .values()\
+#                                            .mapPartitionsWithIndex(get_id)\
+#                                            .reduceByKey(lambda x,y: (x[0]+y[0], x[1]+y[1], x[2]+y[2], x[3]+y[3], x[4]+y[4]))\
+#                                            .mapValues(lambda x: (x[0],x[1],x[2],x[3],x[4],((x[4]-x[3])+(x[3]-x[2])+(x[2]-x[1])+(x[1]-x[0]))/4))\
+#                                            .sortByKey().cache()
     
 #     parking_violations = parking_violations.reduceByKey(lambda x,y: (x[0]+y[0], x[1]+y[1], x[2]+y[2], x[3]+y[3], x[4]+y[4]))\
 #                                            .mapValues(lambda x: (x[0], x[1], x[2], x[3], x[4], 
