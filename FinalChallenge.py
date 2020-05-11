@@ -436,7 +436,7 @@ if __name__ == '__main__':
 #                      .values()\
 #                      .mapPartitionsWithIndex(get_id).cache()
             
-            parking_violations = parking_violations.union(rdd).distinct().cache()
+            parking_violations = parking_violations.union(rdd).cache()
             
     
 #     parking_violations = parking_violations.distinct().cache()
