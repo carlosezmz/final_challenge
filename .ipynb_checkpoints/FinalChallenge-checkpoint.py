@@ -352,7 +352,7 @@ def rdd_union(sc, files_list):
             
             rdd = sc.textFile(file).mapPartitionsWithIndex(extract_cols).cache()
             
-            rdds = rdds.union(rdd).distinct()
+            rdds = rdds.union(rdd).cache()
             
 #     rdds = rdds.distinct()
             
@@ -422,9 +422,9 @@ if __name__ == '__main__':
             
             rdd = sc.textFile(file).mapPartitionsWithIndex(extract_cols).cache()
             
-            parking_violations = parking_violations.union(rdd).distinct()
+            parking_violations = parking_violations.union(rdd).cache()
     
-    parking_violations = parking_violations.join(bounds)\
+    parking_violations = parking_violations.distinct().join(bounds)\
                                            .values()\
                                            .mapPartitionsWithIndex(get_id)\
                                            .reduceByKey(lambda x,y: (x[0]+y[0], x[1]+y[1], x[2]+y[2], x[3]+y[3], x[4]+y[4]))\
