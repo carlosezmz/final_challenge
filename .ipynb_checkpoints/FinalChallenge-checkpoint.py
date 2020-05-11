@@ -373,7 +373,7 @@ if __name__ == '__main__':
     fie2018_dir = 'hdfs:///data/share/bdm/nyc_parking_violation/2018.csv'
     fie2019_dir = 'hdfs:///data/share/bdm/nyc_parking_violation/2019.csv'
     
-    files_list = [fie_dir2015, fie_dir2016, fie_dir2017, fie_dir2018, fie_dir2019]
+    files_list = [fie2015_dir, fie2016_dir, fie2017_dir, fie2018_dir, fie2019_dir]
     
     parking_violations = rdd_union(sc, files_list)
     
