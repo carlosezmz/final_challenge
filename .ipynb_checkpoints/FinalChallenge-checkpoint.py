@@ -346,7 +346,9 @@ def rdd_union(sc, files_list):
     
     center_dir = '/data/share/bdm/nyc_cscl.csv'
     
-    bounds = sc.textFile(center_dir).mapPartitionsWithIndex(extract_bounds)
+    bounds = sc.textFile(center_dir).mapPartitionsWithIndex(extract_bounds).collect()
+    
+    bounds = sc.partallelize(bounds)
     
     for idx, file in enumerate(files_list):
         
