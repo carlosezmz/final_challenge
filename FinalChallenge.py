@@ -423,8 +423,11 @@ if __name__ == '__main__':
             rdd = sc.textFile(file).mapPartitionsWithIndex(extract_cols).cache()
             
             parking_violations = parking_violations.union(rdd).cache()
+            
     
-    parking_violations = parking_violations.distinct().join(bounds)\
+    parking_violations = parking_violations.distinct().cache()
+    
+    parking_violations = parking_violations.join(bounds)\
                                            .values()\
                                            .mapPartitionsWithIndex(get_id)\
                                            .reduceByKey(lambda x,y: (x[0]+y[0], x[1]+y[1], x[2]+y[2], x[3]+y[3], x[4]+y[4]))\
