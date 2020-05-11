@@ -402,9 +402,9 @@ if __name__ == '__main__':
     
     files_list = [fie2015_dir, fie2016_dir, fie2017_dir, fie2018_dir, fie2019_dir]
     
-    parking_violations = rdd_union(sc, files_list)
+    parking_violations = rdd_union(sc, files_list).cache()
     
-    bounds = sc.textFile(center_dir).mapPartitionsWithIndex(extract_bounds)
+    bounds = sc.textFile(center_dir).mapPartitionsWithIndex(extract_bounds).cache()
     
     parking_violations = parking_violations.join(bounds)\
                                            .values()\
