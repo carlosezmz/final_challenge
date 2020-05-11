@@ -418,7 +418,7 @@ if __name__ == '__main__':
             
             rdd = sc.textFile(file)\
                     .mapPartitionsWithIndex(extract_cols)\
-                    .filter(lambda x: x[1][3] == year).cache()
+#                     .filter(lambda x: x[1][3] == year).cache()
             
 #             rdd = rdd.join(bounds)\
 #                      .values()\
@@ -430,13 +430,13 @@ if __name__ == '__main__':
             
             rdd = sc.textFile(file)\
                     .mapPartitionsWithIndex(extract_cols)\
-                    .filter(lambda x: x[1][3] == year).cache()
+#                     .filter(lambda x: x[1][3] == year).cache()
             
 #             rdd = rdd.join(bounds)\
 #                      .values()\
 #                      .mapPartitionsWithIndex(get_id).cache()
             
-            parking_violations = parking_violations.union(rdd).cache()
+            parking_violations = parking_violations.union(rdd).distinct().cache()
             
     
 #     parking_violations = parking_violations.distinct().cache()
