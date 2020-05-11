@@ -111,7 +111,7 @@ def check_county(county):
         'k': 'brooklyn', 'ki':'brooklyn', 'bk':'brooklyn', '3':'brooklyn',
         'q': 'queens', 'qn':'queens', 'qu':'queens', '4':'queens',
         'r': 'staten island', 's':'staten island', 'st':'staten island', 
-            '5':'staten island', 'ri':'staten island', '00':'', 'pb':''
+            '5':'staten island', 'ri':'staten island'
                 }
     try:
         if len(county) > 2:
@@ -120,7 +120,7 @@ def check_county(county):
         elif (len(county) <= 2) & (len(county) > 0):
             county = boro_dict[county]
         
-    except ValueError:
+    except KeyError:
 
         county = ''
         
