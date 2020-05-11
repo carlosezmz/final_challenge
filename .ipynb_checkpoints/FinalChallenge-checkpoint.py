@@ -250,6 +250,9 @@ def extract_cols(partId, records):
             summos = int(row[0])
             county = check_county(row[21].lower())
             number = check_house_number(str(row[23]))
+            
+            if not len(row[4]) > 9: continue
+                
             year = int(datetime.strptime(row[4], '%m/%d/%Y').year)
             st_name = check_name(row[24].lower())
             
