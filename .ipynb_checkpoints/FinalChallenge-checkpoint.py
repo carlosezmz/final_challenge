@@ -412,20 +412,22 @@ if __name__ == '__main__':
 
     for idx, file in enumerate(files_list):
         
+        year = int(file[-8:-4])
+        
         if idx == 0:
             
-            rdd = sc.textFile(file).mapPartitionsWithIndex(extract_cols).cache()
+            rdd = sc.textFile(file).mapPartitionsWithIndex(extract_cols).filter(lambda x: x[1][3] == year).cache()
             
             parking_violations = rdd
             
         else:
             
-            rdd = sc.textFile(file).mapPartitionsWithIndex(extract_cols).cache()
+            rdd = sc.textFile(file).mapPartitionsWithIndex(extract_cols).filter(lambda x: x[1][3] == year).cache()
             
             parking_violations = parking_violations.union(rdd).cache()
             
     
-    parking_violations = parking_violations.distinct().cache()
+#     parking_violations = parking_violations.distinct().cache()
     
     parking_violations = parking_violations.join(bounds)\
                                            .values()\
