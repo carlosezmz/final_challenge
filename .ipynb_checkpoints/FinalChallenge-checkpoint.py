@@ -436,7 +436,6 @@ if __name__ == '__main__':
     
 #     parking_violations = rdd_union(sc, files_list)
 
-    parking_violations_list = []
     
     for idx, file in enumerate(files_list):
         
@@ -446,7 +445,7 @@ if __name__ == '__main__':
         rdd = sc.textFile(file)\
                 .mapPartitionsWithIndex(extract_cols)\
                 .filter(lambda x: x[1][3] == year).join(bounds).values()\
-                .mapPartitionsWithIndex(get_id).collect()
+                .mapPartitionsWithIndex(get_id)
             
 #         rdd = rdd.join(bounds)\
 #                  .values()\
@@ -454,7 +453,13 @@ if __name__ == '__main__':
 #                      .reduceByKey(lambda x,y: (x[0]+y[0], x[1]+y[1], x[2]+y[2], x[3]+y[3], x[4]+y[4])).cache()
 #                      .sortByKey().cache()
             
-        parking_violations_list += rdd
+        if idx == 0:
+            
+            parking_violations_list = rdd
+            
+        else:
+            
+        parking_violations_list = parking_violations_list.union(rdd).cache()
             
 #         else:
             
