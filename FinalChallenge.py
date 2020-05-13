@@ -220,9 +220,7 @@ def get_phyID(county, st_name, number, df):
     
 
     if phy_id.shape[0] > 0:
-        
-#         if type(phy_id['phy_id'][0]) == int:
-        return phy_id['phy_id'][0]
+        return phy_id['phy_id']
     else:
         return None
         
@@ -362,8 +360,6 @@ def reduce_csv(_, records):
     old_x = 0
     
     for phy_id, values in records:
-        
-#         x = (0, 0, 0, 0)
         
         if (phy_id != current_phy_id) & (current_phy_id == None):
             
