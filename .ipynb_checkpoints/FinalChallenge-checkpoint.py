@@ -237,7 +237,7 @@ def extract_cols(partId, records):
     import csv
     from datetime import datetime
     
-#     center_line = extract_bounds(records)
+    df = load_bounds(bounds.value)
     
     reader = csv.reader(records)
     
@@ -245,9 +245,6 @@ def extract_cols(partId, records):
         
         if len(row) == 43:
             
-             
-            
-            summos = int(row[0])
             county = check_county(row[21].lower())
             number = check_house_number(str(row[23]))
             
@@ -256,41 +253,36 @@ def extract_cols(partId, records):
             year = int(datetime.strptime(row[4], '%m/%d/%Y').year)
             st_name = check_name(row[24].lower())
             
-            if year not in [2015, 2016, 2017, 2018, 2019]: continue
+            if year != year_file.value[0]: continue
 
             if county in ['staten island', 'new york', 'bronx', 'brooklyn', 'queens']:
                 
                 if (type(number[0]) == int) & (type(number[1]) == int) & (type(number) == tuple):
-
-#                 if type(number) == tuple:
-#                     yield (county, st_name, number)
                     
-                    yield (county, (st_name, number, summos, year))
+                    phy_id = get_phyID(county, st_name, number, df)
                     
-#                     phy_id = get_phyID(county, st_name, number, center_line)
-        
-#                     if county in df['county'].unique():
-            
-#                     if st_name in center_line[county].keys():
-            
-#                         for idx, segment in enumerate(center_line[county][st_name]['bounds']):
-                    
-#                             if (number >= segment[0]) & (number <= segment[1]):
-                            
-#                                 phy_id = center_line[county][st_name]['phy_id'][idx]
-            
-                
-#                                 if type(phy_id) == int:
+                    if phy_id:
                         
-#                                     year_dict = {2015:0, 2016:0, 2017:0, 2018:0, 2019:0}
+                        year_dict = {2015:0, 2016:0, 2017:0, 2018:0, 2019:0}
                         
-#                                     year_dict[year] = 1
+                        year_dict[year] = 1
                             
-#                                     year_t = (year_dict[2015], year_dict[2016], year_dict[2017], year_dict[2018], 
-#                                               year_dict[2019])
+                        year_t = (year_dict[2015], year_dict[2016], year_dict[2017], year_dict[2018], 
+                                              year_dict[2019])
             
-#                                     yield (phy_id, str(row[0]), year_t)
+                        yield (phy_id, str(row[0]), year_t)
     
+    
+    
+
+    
+def load_bounds(bond):
+    
+    import pandas as pd
+    
+    df = pd.DataFrame(bond, columns=['county', 'st_name', 'phy_id', 'l_low', 'l_hig'])
+            
+    return df    
     
     
 def extract_bounds(partID, records):
@@ -300,15 +292,10 @@ def extract_bounds(partID, records):
     
     import csv
     
-#     empty_dict = {}
-        
-#     with open(center_dir) as csv_file:
-    
     reader = csv.reader(records)
+    
 
-    for idx, row in enumerate(reader):
-        
-        if idx == 0: continue
+    for row in reader:
             
         county = check_county(row[13])
         
@@ -318,23 +305,9 @@ def extract_bounds(partID, records):
             (l_low, l_hig) = street_bounds(row[1], row[3], row[4], row[5])
             
             if (l_hig != l_low) & (type(l_low) == tuple) & (type(l_hig) == tuple):
-                    
-#                     if county not in empty_dict.keys():
-                    
-#                 empty_dict[county] = empty_dict.get(county, {})
-                    
-#                 if st_name not in empty_dict[county].keys():
-#                     empty_dict[county][st_name] = {'bounds' : [(l_low, l_hig)], 'phy_id':[phy_id]}
-# #                         empty_dict[county][st_name]['phy_id'] = [phy_id]
-                        
-#                 else:
-                    
-#                     empty_dict[county][st_name]['bounds'].append((l_low, l_hig))
-                    
-#                     empty_dict[county][st_name]['phy_id'].append(phy_id)
         
-                    yield (county, (st_name, phy_id, l_low, l_hig))
-#     return empty_dict
+                    yield (county, st_name, phy_id, l_low, l_hig)
+
             
             
 
@@ -386,6 +359,7 @@ def reduce_csv(_, records):
     old_phy_id = None
     current_phy_id = None
     x = 0
+    old_x = 0
     
     for phy_id, values in records:
         
@@ -409,9 +383,12 @@ def reduce_csv(_, records):
             old_phy_id = current_phy_id
             current_phy_id = phy_id
             
-            rate = ((x[4]-x[3])+(x[3]-x[2])+(x[2]-x[1])+(x[1]-x[0]))/4
+            old_x = x
+            x = values
             
-            yield ', '.join((str(phy_id), str(x[0]), str(x[1]), str(x[2]), str(x[3]), str(x[4]), str(rate)))   
+            rate = ((old_x[4]-old_x[3])+(old_x[3]-old_x[2])+(old_x[2]-old_x[1])+(old_x[1]-old_x[0]))/4
+            
+            yield ', '.join((str(old_phy_id), str(old_x[0]), str(old_x[1]), str(old_x[2]), str(old_x[3]), str(old_x[4]), str(rate)))   
         
             
 if __name__ == '__main__':
@@ -432,7 +409,9 @@ if __name__ == '__main__':
     
     bounds = sc.textFile(center_dir).mapPartitionsWithIndex(extract_bounds)
     
-#     bounds = sc.broadcast(bounds)
+    bounds = sc.broadcast(bounds)
+    
+    year_file = sc.broadcast([2015])
     
 #     parking_violations = rdd_union(sc, files_list)
 
@@ -480,17 +459,14 @@ if __name__ == '__main__':
 #     parking_violations = parking_violations.distinct().cache()
 
     parking_violations = sc.textFile(fie2015_dir)\
-                .mapPartitionsWithIndex(extract_cols)\
-                .filter(lambda x: x[1][3] == 2015).join(bounds).values()\
-                .mapPartitionsWithIndex(get_id)
-    
-    parking_violations = parking_violations.reduceByKey(lambda x,y: (x[0]+y[0], x[1]+y[1], x[2]+y[2], x[3]+y[3], x[4]+y[4]))\
-                                           .mapValues(lambda x: (x[0], x[1], x[2], x[3], x[4],
-                                                                 ((x[4] - x[3]) + (x[3] - x[2]) + (x[2] - x[1]) + (x[1] - x[0]))/4))\
-                                           .sortByKey()
+                           .mapPartitionsWithIndex(extract_cols)\
+                           .mapPartitionsWithIndex(reduce_csv)\
+                           .saveAsTextFile('Violations')
+
+
     
 
     
 #     parking_violations.mapPartitionsWithIndex(reduce_csv).saveAsTextFile('Violations')
-    parking_violations.saveAsTextFile('Violations')
+#     parking_violations.saveAsTextFile('Violations')
 
