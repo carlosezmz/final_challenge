@@ -221,8 +221,8 @@ def get_phyID(county, st_name, number, df):
 
     if phy_id.shape[0] > 0:
         
-        if type(phy_id['phy_id'][0]) == int:
-            return phy_id['phy_id'][0]
+#         if type(phy_id['phy_id'][0]) == int:
+        return phy_id['phy_id'][0]
     else:
         return None
         
