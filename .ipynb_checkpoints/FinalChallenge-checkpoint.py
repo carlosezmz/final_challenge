@@ -367,17 +367,17 @@ def get_id(partID, records):
         
         if row[0][0] != row[1][0]: continue
             
-        if (row[0][1] >= row[1][2]) & (row[0][1] <= row[1][3]):
+        if (row[0][0] >= row[1][1]) & (row[0][0] <= row[1][2]):
             
             year_d = {2015:0, 2016:0, 2017:0, 2018:0, 2019:0}
             
-            if row[0][3] in year_d:
+            if row[0][2] in year_d:
                 
-                year_d[row[0][3]] = 1
+                year_d[row[0][2]] = 1
                 
                 year_t = (year_d[2015], year_d[2016], year_d[2017], year_d[2018], year_d[2019])
             
-                yield (row[0][2], year_t)
+                yield (row[0][1], year_t)
     
  
     
@@ -430,9 +430,9 @@ if __name__ == '__main__':
     
 #     parking_violations = rdd_union(sc, files_list).collect()
     
-    bounds = sc.textFile(center_dir).mapPartitionsWithIndex(extract_bounds)
+    bounds = sc.textFile(center_dir).mapPartitionsWithIndex(extract_bounds).collect()
     
-#     bounds = sc.parallelize(bounds)
+    bounds = sc.broadcast(bounds)
     
 #     parking_violations = rdd_union(sc, files_list)
 
