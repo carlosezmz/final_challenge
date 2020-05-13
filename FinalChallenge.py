@@ -430,32 +430,32 @@ if __name__ == '__main__':
     
 #     parking_violations = rdd_union(sc, files_list).collect()
     
-    bounds = sc.textFile(center_dir).mapPartitionsWithIndex(extract_bounds).cache()
+    bounds = sc.textFile(center_dir).mapPartitionsWithIndex(extract_bounds)
     
 #     bounds = sc.parallelize(bounds)
     
 #     parking_violations = rdd_union(sc, files_list)
 
     
-    for idx, file in enumerate(files_list):
+#     for idx, file in enumerate(files_list):
         
-        year = int(file[-8:-4])
+#         year = int(file[-8:-4])
         
             
-        rdd = sc.textFile(file)\
-                .mapPartitionsWithIndex(extract_cols)\
-                .filter(lambda x: x[1][3] == year).join(bounds).values()\
-                .mapPartitionsWithIndex(get_id).collect()
+#         rdd = sc.textFile(file)\
+#                 .mapPartitionsWithIndex(extract_cols)\
+#                 .filter(lambda x: x[1][3] == year).join(bounds).values()\
+#                 .mapPartitionsWithIndex(get_id)
             
-#         rdd = rdd.join(bounds)\
-#                  .values()\
-#                  .mapPartitionsWithIndex(get_id)\
-#                      .reduceByKey(lambda x,y: (x[0]+y[0], x[1]+y[1], x[2]+y[2], x[3]+y[3], x[4]+y[4])).cache()
-#                      .sortByKey().cache()
+# #         rdd = rdd.join(bounds)\
+# #                  .values()\
+# #                  .mapPartitionsWithIndex(get_id)\
+# #                      .reduceByKey(lambda x,y: (x[0]+y[0], x[1]+y[1], x[2]+y[2], x[3]+y[3], x[4]+y[4])).cache()
+# #                      .sortByKey().cache()
             
-#         if idx == 0:
+# #         if idx == 0:
             
-        parking_violations_list += rdd
+#         parking_violations_list += rdd
             
 #         else:
             
@@ -479,10 +479,10 @@ if __name__ == '__main__':
     
 #     parking_violations = parking_violations.distinct().cache()
 
-    parking_violations = sc.textFile(file)\
+    parking_violations = sc.textFile(fie2015_dir)\
                 .mapPartitionsWithIndex(extract_cols)\
-                .filter(lambda x: x[1][3] == year).join(bounds).values()\
-                .mapPartitionsWithIndex(get_id).collect()
+                .filter(lambda x: x[1][3] == 2015).join(bounds).values()\
+                .mapPartitionsWithIndex(get_id)
     
     parking_violations = parking_violations.reduceByKey(lambda x,y: (x[0]+y[0], x[1]+y[1], x[2]+y[2], x[3]+y[3], x[4]+y[4]))\
                                            .mapValues(lambda x: (x[0], x[1], x[2], x[3], x[4],
