@@ -219,9 +219,9 @@ def get_phyID(county, st_name, number, df):
               & (df['l_hig'] >= number)]
     
 
-    if phy_id.shape[0] > 0:
-        return phy_id['phy_id']
-    else:
+    try:
+        return phy_id['phy_id'][0]
+    except KeyError:
         return None
         
 
