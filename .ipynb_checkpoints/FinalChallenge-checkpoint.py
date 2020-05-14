@@ -268,7 +268,7 @@ def extract_cols(partId, records):
                         year_t = (year_dict[2015], year_dict[2016], year_dict[2017], year_dict[2018], 
                                               year_dict[2019])
             
-                        yield (phy_id, str(row[0]), year_t)
+                        yield (phy_id, year_t)
     
     
     
