@@ -268,7 +268,7 @@ def extract_cols(partId, records):
                         year_t = (year_dict[2015], year_dict[2016], year_dict[2017], year_dict[2018], 
                                               year_dict[2019])
             
-                        yield (phy_id, year_t)
+                        yield (phy_id, year_dict[2015], year_dict[2016], year_dict[2017], year_dict[2018], year_dict[2019])
     
     
     
@@ -359,20 +359,22 @@ def reduce_csv(_, records):
     x = 0
     old_x = 0
     
-    for phy_id, values in records:
+    for values in records:
+        
+        phy_id = values[0]
         
         if (phy_id != current_phy_id) & (current_phy_id == None):
             
             current_phy_id = phy_id
-            x = values
+            x = values[1:]
             
         elif (phy_id == current_phy_id):
             
-            x[0] += values[0]
-            x[1] += values[1]
-            x[2] += values[2]
-            x[3] += values[3]
-            x[4] += values[4]
+            x[0] += values[1]
+            x[1] += values[2]
+            x[2] += values[3]
+            x[3] += values[4]
+            x[4] += values[5]
             
         else:
             
@@ -380,7 +382,7 @@ def reduce_csv(_, records):
             current_phy_id = phy_id
             
             old_x = x
-            x = values
+            x = values[1:]
             
             rate = ((old_x[4]-old_x[3])+(old_x[3]-old_x[2])+(old_x[2]-old_x[1])+(old_x[1]-old_x[0]))/4
             
