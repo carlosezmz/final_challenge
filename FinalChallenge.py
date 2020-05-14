@@ -457,7 +457,7 @@ if __name__ == '__main__':
     parking_violations = sc.textFile(fie2015_dir)\
                            .mapPartitionsWithIndex(extract_cols)\
                            .mapPartitionsWithIndex(reduce_csv)\
-                           .saveAsTextFile('Violations')
+                           .saveAsTextFile('parking_count')
 
 
     
