@@ -235,7 +235,7 @@ def extract_cols(partId, records):
     import csv
     from datetime import datetime
     
-    df = load_bounds(bounds.value)
+#     df = load_bounds(bounds.value)
     
     reader = csv.reader(records)
     
