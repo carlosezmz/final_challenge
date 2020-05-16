@@ -190,26 +190,13 @@ def street_bounds(l_low, l_hig, r_low, r_hig):
     
     return (l_low, l_hig)
 
-# def get_centerLine(center_dir):
-    
-#     from pyspark import SparkContext
-#     import pandas as pd
-    
-#     sc = SparkContext()
-    
-#     center_line = sc.textFile(center_dir)\
-#                     .mapPartitionsWithIndex(extract_bounds)\
-#                     .collect()
-    
-#     center_line = pd.DataFrame(center_line, columns=['county', 
-#                                                      'st_name', 
-#                                                      'number', 
-#                                                      'min_bound', 
-#                                                      'max_ bound'])
-    
-#     return center_line
 
-def get_phyID(county, st_name, number, df):
+
+def get_phyID(county, st_name, number):
+    
+    for bond in bonds.value:
+        
+        if 
     
     
     
@@ -276,17 +263,14 @@ def extract_cols(partId, records):
     
 
     
-# def load_bounds(bond):
-    
-    
-#     for b in bond:
+def load_bounds(bond):
         
     
-#     import pandas as pd
+    import pandas as pd
     
-#     df = pd.DataFrame(bond, columns=['county', 'st_name', 'phy_id', 'l_low', 'l_hig'])
+    df = pd.DataFrame(bond, columns=['county', 'st_name', 'phy_id', 'l_low', 'l_hig'])
             
-#     return df    
+    return df    
     
     
 def extract_bounds(partID, records):
@@ -397,6 +381,15 @@ def reduce_csv(_, records):
             rate = ((old_x[4]-old_x[3])+(old_x[3]-old_x[2])+(old_x[2]-old_x[1])+(old_x[1]-old_x[0]))/4
             
             yield (old_phy_id, old_x[0], old_x[1], old_x[2], old_x[3], old_x[4], rate)
+            
+            
+def filter_id(partID, records):
+    
+    for row in records:
+        
+        if (row[0][0] >= row[1][1]) & (row[0][0] <= row[1][2]):
+            
+            yield (row[1][0], row[0][1])
         
             
 if __name__ == '__main__':
@@ -472,10 +465,9 @@ if __name__ == '__main__':
 #     parking_violations = sc.textFile(fie2015_dir)\
 #                            .mapPartitionsWithIndex(extract_cols)\
     
-    parking_violations = parking_violations_list.join(bounds).values()\
-                                           .filter(lambda x: (x[0][0] >= x[1][1]) & (x[0][0] <= x[1][2]))\
-                                           .map(lambda x: (x[1][0], x[0][1]))\
-                                           .sortByKey()\
+#     parking_violations = parking_violations_list.join(bounds).values()\
+#                                                 .mapPartitionsWithIndex(filter_id)\
+#                                                 .sortByKey()\
 #                                            .mapPartitionsWithIndex(reduce_csv)\
 #                                            .saveAsTextFile('parkingCount')
 
@@ -483,6 +475,6 @@ if __name__ == '__main__':
     
 
     
-    parking_violations.mapPartitionsWithIndex(reduce_csv).saveAsTextFile('Tickets_count')
-#     parking_violations_list.saveAsTextFile('parkingCount')
+#     parking_violations.mapPartitionsWithIndex(reduce_csv).saveAsTextFile('Tickets')
+    parking_violations_list.saveAsTextFile('parkingCount_xd')
 
