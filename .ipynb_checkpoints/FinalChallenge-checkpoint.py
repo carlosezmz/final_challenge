@@ -419,7 +419,7 @@ if __name__ == '__main__':
 #     parking_violations = rdd_union(sc, files_list)
 
     
-    for idx, file in enumerate(files_list):
+    for idx, file in enumerate([fie2015_dir]):
         
         year = int(file[-8:-4])
         
