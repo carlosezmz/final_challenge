@@ -392,7 +392,7 @@ def reduce_csv(_, records):
             
             rate = ((old_x[4]-old_x[3])+(old_x[3]-old_x[2])+(old_x[2]-old_x[1])+(old_x[1]-old_x[0]))/4
             
-            yield ', '.join((str(old_phy_id), str(old_x[0]), str(old_x[1]), str(old_x[2]), str(old_x[3]), str(old_x[4]), str(rate)))   
+            yield (old_phy_id, old_x[0], old_x[1], old_x[2], old_x[3], old_x[4], rate)
         
             
 if __name__ == '__main__':
@@ -411,23 +411,23 @@ if __name__ == '__main__':
     
 #     parking_violations = rdd_union(sc, files_list).collect()
     
-#     bounds = sc.textFile(center_dir).mapPartitionsWithIndex(extract_bounds).collect()
+    bounds = sc.textFile(center_dir).mapPartitionsWithIndex(extract_bounds).collect()
     
-#     bounds = sc.broadcast(bounds)
+    bounds = sc.broadcast(bounds)
     
     
 #     parking_violations = rdd_union(sc, files_list)
 
     
-    for idx, file in enumerate(files_list):
+#     for idx, file in enumerate(files_list):
         
-        year = int(file[-8:-4])
+#         year = int(file[-8:-4])
         
-        year_file = sc.broadcast([year])
+#         year_file = sc.broadcast([year])
         
             
-        rdd = sc.textFile(file)\
-                .mapPartitionsWithIndex(extract_cols)\
+#         rdd = sc.textFile(file)\
+#                 .mapPartitionsWithIndex(extract_cols)\
 #                 .filter(lambda x: x[1][3] == year).join(bounds).values()\
 #                 .mapPartitionsWithIndex(get_id)
             
@@ -437,13 +437,13 @@ if __name__ == '__main__':
 #                      .reduceByKey(lambda x,y: (x[0]+y[0], x[1]+y[1], x[2]+y[2], x[3]+y[3], x[4]+y[4])).cache()
 #                      .sortByKey().cache()
             
-        if idx == 0:
+#         if idx == 0:
             
-            parking_violations_list = rdd
+#             parking_violations_list = rdd
             
-        else:
+#         else:
             
-            parking_violations_list = parking_violations_list.union(rdd).cache()
+#             parking_violations_list = parking_violations_list.union(rdd).cache()
             
 #         else:
             
@@ -463,16 +463,16 @@ if __name__ == '__main__':
     
 #     parking_violations = parking_violations.distinct().cache()
 
-#     parking_violations = sc.textFile(fie2015_dir)\
-#                            .mapPartitionsWithIndex(extract_cols)\
-#                            .join(bounds).values().filter(lambda x: (x[0][0] >= x[1][1]) & (x[0][0] <= x[1][2]))
-#                            .mapPartitionsWithIndex(reduce_csv)\
-#                            .saveAsTextFile('parking_count')
+    parking_violations = sc.textFile(fie2015_dir)\
+                           .mapPartitionsWithIndex(extract_cols)\
+                           .join(bounds).values().filter(lambda x: (x[0][0] >= x[1][1]) & (x[0][0] <= x[1][2]))
+                           .mapPartitionsWithIndex(reduce_csv)\
+                           .saveAsTextFile('parkingCount')
 
 
     
 
     
 #     parking_violations.mapPartitionsWithIndex(reduce_csv).saveAsTextFile('Violations')
-    parking_violations.saveAsTextFile('Violation')
+#     parking_violations.saveAsTextFile('Violation')
 
