@@ -257,18 +257,20 @@ def extract_cols(partId, records):
                 
                 if (type(number[0]) == int) & (type(number[1]) == int) & (type(number) == tuple):
                     
-                    phy_id = get_phyID(county, st_name, number, df)
+                    yield ((county, st_name), number, year)
                     
-                    if phy_id:
+#                     phy_id = get_phyID(county, st_name, number, df)
+                    
+#                     if phy_id:
                         
-                        year_dict = {2015:0, 2016:0, 2017:0, 2018:0, 2019:0}
+#                         year_dict = {2015:0, 2016:0, 2017:0, 2018:0, 2019:0}
                         
-                        year_dict[year] = 1
+#                         year_dict[year] = 1
                             
-                        year_t = (year_dict[2015], year_dict[2016], year_dict[2017], year_dict[2018], 
-                                              year_dict[2019])
+#                         year_t = (year_dict[2015], year_dict[2016], year_dict[2017], year_dict[2018], 
+#                                               year_dict[2019])
             
-                        yield (phy_id, year_dict[2015], year_dict[2016], year_dict[2017], year_dict[2018], year_dict[2019])
+#                         yield (phy_id, year_dict[2015], year_dict[2016], year_dict[2017], year_dict[2018], year_dict[2019])
     
     
     
@@ -308,7 +310,7 @@ def extract_bounds(partID, records):
             
             if (l_hig != l_low) & (type(l_low) == tuple) & (type(l_hig) == tuple):
         
-                    yield (county, st_name, phy_id, l_low, l_hig)
+                    yield ((county, st_name), phy_id, l_low, l_hig)
 
             
             
@@ -405,42 +407,43 @@ if __name__ == '__main__':
     fie2018_dir = '/data/share/bdm/nyc_parking_violation/2018.csv'
     fie2019_dir = '/data/share/bdm/nyc_parking_violation/2019.csv'
     
-    files_list = [fie2015_dir]
+    files_list = [fie2015_dir, fie2016_dir, fie2017_dir, fie2018_dir, fie2019_dir]
     
 #     parking_violations = rdd_union(sc, files_list).collect()
     
-    bounds = sc.textFile(center_dir).mapPartitionsWithIndex(extract_bounds).collect()
+#     bounds = sc.textFile(center_dir).mapPartitionsWithIndex(extract_bounds).collect()
     
-    bounds = sc.broadcast(bounds)
+#     bounds = sc.broadcast(bounds)
     
-    year_file = sc.broadcast([2015])
     
 #     parking_violations = rdd_union(sc, files_list)
 
     
-#     for idx, file in enumerate(files_list):
+    for idx, file in enumerate(files_list):
         
-#         year = int(file[-8:-4])
+        year = int(file[-8:-4])
+        
+        year_file = sc.broadcast([year])
         
             
-#         rdd = sc.textFile(file)\
-#                 .mapPartitionsWithIndex(extract_cols)\
+        rdd = sc.textFile(file)\
+                .mapPartitionsWithIndex(extract_cols)\
 #                 .filter(lambda x: x[1][3] == year).join(bounds).values()\
 #                 .mapPartitionsWithIndex(get_id)
             
-# #         rdd = rdd.join(bounds)\
-# #                  .values()\
-# #                  .mapPartitionsWithIndex(get_id)\
-# #                      .reduceByKey(lambda x,y: (x[0]+y[0], x[1]+y[1], x[2]+y[2], x[3]+y[3], x[4]+y[4])).cache()
-# #                      .sortByKey().cache()
+#         rdd = rdd.join(bounds)\
+#                  .values()\
+#                  .mapPartitionsWithIndex(get_id)\
+#                      .reduceByKey(lambda x,y: (x[0]+y[0], x[1]+y[1], x[2]+y[2], x[3]+y[3], x[4]+y[4])).cache()
+#                      .sortByKey().cache()
             
-# #         if idx == 0:
+        if idx == 0:
             
-#         parking_violations_list += rdd
+            parking_violations_list = rdd
             
-#         else:
+        else:
             
-#             parking_violations_list = parking_violations_list.union(rdd).cache()
+            parking_violations_list = parking_violations_list.union(rdd).cache()
             
 #         else:
             
@@ -451,8 +454,8 @@ if __name__ == '__main__':
 #             rdd = rdd.join(bounds)\
 #                      .values()\
 #                      .mapPartitionsWithIndex(get_id).sortByKey().collect()
-# #                      .reduceByKey(lambda x,y: (x[0]+y[0], x[1]+y[1], x[2]+y[2], x[3]+y[3], x[4]+y[4]))\
-# #                      .sortByKey().cache()
+#                      .reduceByKey(lambda x,y: (x[0]+y[0], x[1]+y[1], x[2]+y[2], x[3]+y[3], x[4]+y[4]))\
+#                      .sortByKey().cache()
             
             
 #             parking_violations = parking_violations.union(rdd).cache()
@@ -460,15 +463,16 @@ if __name__ == '__main__':
     
 #     parking_violations = parking_violations.distinct().cache()
 
-    parking_violations = sc.textFile(fie2015_dir)\
-                           .mapPartitionsWithIndex(extract_cols)\
-                           .mapPartitionsWithIndex(reduce_csv)\
-                           .saveAsTextFile('parking_count')
+#     parking_violations = sc.textFile(fie2015_dir)\
+#                            .mapPartitionsWithIndex(extract_cols)\
+#                            .join(bounds).values().filter(lambda x: (x[0][0] >= x[1][1]) & (x[0][0] <= x[1][2]))
+#                            .mapPartitionsWithIndex(reduce_csv)\
+#                            .saveAsTextFile('parking_count')
 
 
     
 
     
 #     parking_violations.mapPartitionsWithIndex(reduce_csv).saveAsTextFile('Violations')
-#     parking_violations.saveAsTextFile('Violations')
+    parking_violations.saveAsTextFile('Violations')
 
