@@ -257,7 +257,7 @@ def extract_cols(partId, records):
                 
                 if (type(number[0]) == int) & (type(number[1]) == int) & (type(number) == tuple):
                     
-                    yield ((county, st_name), number, year)
+                    yield ((county, st_name), (number, year))
                     
 #                     phy_id = get_phyID(county, st_name, number, df)
                     
@@ -310,7 +310,7 @@ def extract_bounds(partID, records):
             
             if (l_hig != l_low) & (type(l_low) == tuple) & (type(l_hig) == tuple):
         
-                    yield ((county, st_name), phy_id, l_low, l_hig)
+                    yield ((county, st_name), (phy_id, l_low, l_hig))
 
             
             
@@ -362,33 +362,37 @@ def reduce_csv(_, records):
     
     old_phy_id = None
     current_phy_id = None
-    x = 0
-    old_x = 0
+    x = [0, 0, 0, 0, 0]
+    old_x = [0, 0, 0, 0, 0]
+    
+    
+    years_list = [2015, 2016, 2017, 2018, 2019]
     
     for values in records:
         
         phy_id = values[0]
         
+        year = values[1]
+        
+        idx = years_list.index(year)
+        
         if (phy_id != current_phy_id) & (current_phy_id == None):
             
             current_phy_id = phy_id
-            x = values[1:]
+            x[idx] += 1
             
         elif (phy_id == current_phy_id):
             
-            x[0] += values[1]
-            x[1] += values[2]
-            x[2] += values[3]
-            x[3] += values[4]
-            x[4] += values[5]
+            x[idx] += 1
             
         else:
             
             old_phy_id = current_phy_id
             current_phy_id = phy_id
             
-            old_x = x
-            x = values[1:]
+            old_x = tuple(x)
+            x = [0, 0, 0, 0, 0]
+            x[idx] += 1
             
             rate = ((old_x[4]-old_x[3])+(old_x[3]-old_x[2])+(old_x[2]-old_x[1])+(old_x[1]-old_x[0]))/4
             
@@ -470,6 +474,7 @@ if __name__ == '__main__':
     
     parking_violations = parking_violations.join(bounds).values()\
                                            .filter(lambda x: (x[0][0] >= x[1][1]) & (x[0][0] <= x[1][2]))\
+                                           .map(lambda x: (x[1][0], x[0][1]))\
                                            .sortByKey()\
                                            .mapPartitionsWithIndex(reduce_csv)\
 #                                            .saveAsTextFile('parkingCount')
