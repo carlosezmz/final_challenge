@@ -463,7 +463,7 @@ if __name__ == '__main__':
     
 #     parking_violations = sc.parallelize(parking_violations_list)
 
-#     year_file = sc.broadcast([2015])
+    year_file = sc.broadcast([2015])
 
     parking_violations = sc.textFile(fie2015_dir)\
                            .mapPartitionsWithIndex(extract_cols)\
