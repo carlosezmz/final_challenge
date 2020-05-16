@@ -443,7 +443,7 @@ if __name__ == '__main__':
             
         else:
             
-            parking_violations_list = parking_violations_list.union(rdd).cache()
+            parking_violations_list = parking_violations_list.union(rdd)
             
 #         else:
             
