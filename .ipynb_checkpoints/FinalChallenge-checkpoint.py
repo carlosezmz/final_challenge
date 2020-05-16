@@ -419,15 +419,15 @@ if __name__ == '__main__':
 #     parking_violations = rdd_union(sc, files_list)
 
     
-    for idx, file in enumerate([fie2015_dir]):
+#     for idx, file in enumerate([fie2015_dir]):
         
-        year = int(file[-8:-4])
+#         year = int(file[-8:-4])
         
-        year_file = sc.broadcast([year])
+#         year_file = sc.broadcast([year])
         
             
-        rdd = sc.textFile(file)\
-                .mapPartitionsWithIndex(extract_cols).collect()
+#         rdd = sc.textFile(file)\
+#                 .mapPartitionsWithIndex(extract_cols).collect()
 #                 .filter(lambda x: x[1][3] == year).join(bounds).values()\
 #                 .mapPartitionsWithIndex(get_id)
             
@@ -439,7 +439,7 @@ if __name__ == '__main__':
             
 #         if idx == 0:
             
-        parking_violations_list += rdd
+#         parking_violations_list += rdd
             
 #         else:
             
@@ -461,12 +461,12 @@ if __name__ == '__main__':
 #             parking_violations = parking_violations.union(rdd).cache()
             
     
-    parking_violations = sc.parallelize(parking_violations_list)
+#     parking_violations = sc.parallelize(parking_violations_list)
 
 #     year_file = sc.broadcast([2015])
 
-#     parking_violations = sc.textFile(fie2015_dir)\
-#                            .mapPartitionsWithIndex(extract_cols)\
+    parking_violations = sc.textFile(fie2015_dir)\
+                           .mapPartitionsWithIndex(extract_cols)\
     
     parking_violations = parking_violations.join(bounds).values()\
                                            .filter(lambda x: (x[0][0] >= x[1][1]) & (x[0][0] <= x[1][2]))\
