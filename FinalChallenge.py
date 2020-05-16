@@ -276,17 +276,17 @@ def extract_cols(partId, records):
     
 
     
-def load_bounds(bond):
+# def load_bounds(bond):
     
     
-    for b in bond:
+#     for b in bond:
         
     
-    import pandas as pd
+#     import pandas as pd
     
-    df = pd.DataFrame(bond, columns=['county', 'st_name', 'phy_id', 'l_low', 'l_hig'])
+#     df = pd.DataFrame(bond, columns=['county', 'st_name', 'phy_id', 'l_low', 'l_hig'])
             
-    return df    
+#     return df    
     
     
 def extract_bounds(partID, records):
