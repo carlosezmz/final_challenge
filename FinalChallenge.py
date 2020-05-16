@@ -443,7 +443,7 @@ if __name__ == '__main__':
             
         if idx == 0:
             
-        parking_violations_list = rdd
+            parking_violations_list = rdd
             
         else:
             
