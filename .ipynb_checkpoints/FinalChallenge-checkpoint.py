@@ -483,6 +483,6 @@ if __name__ == '__main__':
     
 
     
-    parking_violations.mapPartitionsWithIndex(reduce_csv).saveAsTextFile('Violations')
+    parking_violations.mapPartitionsWithIndex(reduce_csv).saveAsTextFile('Tickets_count')
 #     parking_violations_list.saveAsTextFile('parkingCount')
 
