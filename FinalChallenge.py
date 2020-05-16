@@ -474,5 +474,5 @@ if __name__ == '__main__':
 
     
 #     parking_violations.mapPartitionsWithIndex(reduce_csv).saveAsTextFile('Violations')
-    parking_violations.saveAsTextFile('Violations')
+    parking_violations.saveAsTextFile('Violation')
 
