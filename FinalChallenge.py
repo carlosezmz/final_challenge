@@ -472,10 +472,10 @@ if __name__ == '__main__':
 #     parking_violations = sc.textFile(fie2015_dir)\
 #                            .mapPartitionsWithIndex(extract_cols)\
     
-#     parking_violations = parking_violations.join(bounds).values()\
-#                                            .filter(lambda x: (x[0][0] >= x[1][1]) & (x[0][0] <= x[1][2]))\
-#                                            .map(lambda x: (x[1][0], x[0][1]))\
-#                                            .sortByKey()\
+    parking_violations = parking_violations_list.join(bounds).values()\
+                                           .filter(lambda x: (x[0][0] >= x[1][1]) & (x[0][0] <= x[1][2]))\
+                                           .map(lambda x: (x[1][0], x[0][1]))\
+                                           .sortByKey()\
 #                                            .mapPartitionsWithIndex(reduce_csv)\
 #                                            .saveAsTextFile('parkingCount')
 
@@ -483,6 +483,6 @@ if __name__ == '__main__':
     
 
     
-#     parking_violations.mapPartitionsWithIndex(reduce_csv).saveAsTextFile('Violations')
-    parking_violations_list.saveAsTextFile('parkingCount')
+    parking_violations.mapPartitionsWithIndex(reduce_csv).saveAsTextFile('Violations')
+#     parking_violations_list.saveAsTextFile('parkingCount')
 
