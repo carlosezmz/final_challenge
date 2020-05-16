@@ -468,6 +468,7 @@ if __name__ == '__main__':
     parking_violations = sc.textFile(fie2015_dir)\
                            .mapPartitionsWithIndex(extract_cols)\
                            .join(bounds).values().filter(lambda x: (x[0][0] >= x[1][1]) & (x[0][0] <= x[1][2]))\
+                           .sortByKey()\
                            .mapPartitionsWithIndex(reduce_csv)\
                            .saveAsTextFile('parkingCount')
 
