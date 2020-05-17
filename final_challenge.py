@@ -128,30 +128,6 @@ def check_county(county):
 
 
 
-
-def make_bounds(geom):
-
-    lat_list = []
-    lon_list = []
-
-#     emp_list = []
-
-    for latlon in geom.strip('MULTILINESTRING ').strip('()').split(', '):
-    
-        lon, lat = latlon.split(' ')
-#         emp_list.append(float(lon), float(lat))
-    
-        lat_list.append(float(lat)) 
-        lon_list.append(float(lon))
-    
-    if len(lon_list) > 0:
-        
-#         return emp_list
-
-        return ((max(lon_list), min(lon_list)), (max(lat_list), min(lat_list)))
-        
-    else:
-        return None
     
 
 def get_digits(number):
@@ -380,7 +356,7 @@ def reduce_csv(_, records):
             
             rate = ((old_x[4]-old_x[3])+(old_x[3]-old_x[2])+(old_x[2]-old_x[1])+(old_x[1]-old_x[0]))/4
             
-            yield (old_phy_id, old_x[0], old_x[1], old_x[2], old_x[3], old_x[4], rate)
+            yield '; '.join((str(old_phy_id), str(old_x[0]), str(old_x[1]), str(old_x[2]), str(old_x[3]), str(old_x[4]), str(rate)))
             
             
 def filter_id(partID, records):
@@ -406,9 +382,10 @@ if __name__ == '__main__':
     
     files_list = [fie2015_dir, fie2016_dir, fie2017_dir, fie2018_dir, fie2019_dir]
     
+    bounds = sc.textFile(center_dir).mapPartitionsWithIndex(extract_bounds)
+    
 #     parking_violations = rdd_union(sc, files_list).collect()
     
-    bounds = sc.textFile(center_dir).mapPartitionsWithIndex(extract_bounds)
     
 #     bounds = sc.broadcast(bounds)
     
@@ -424,7 +401,7 @@ if __name__ == '__main__':
         
             
         rdd = sc.textFile(file)\
-                .mapPartitionsWithIndex(extract_cols).cache()
+                .mapPartitionsWithIndex(extract_cols)
 # #                 .filter(lambda x: x[1][3] == year).join(bounds).values()\
 # #                 .mapPartitionsWithIndex(get_id)
             
@@ -433,6 +410,9 @@ if __name__ == '__main__':
 # #                  .mapPartitionsWithIndex(get_id)\
 # #                      .reduceByKey(lambda x,y: (x[0]+y[0], x[1]+y[1], x[2]+y[2], x[3]+y[3], x[4]+y[4])).cache()
 # #                      .sortByKey().cache()
+
+        rdd = rdd.join(bounds).values()\
+                 .mapPartitionsWithIndex(filter_id)
             
         if idx == 0:
             
@@ -464,10 +444,12 @@ if __name__ == '__main__':
 
 #     parking_violations = sc.textFile(fie2015_dir)\
 #                            .mapPartitionsWithIndex(extract_cols)\
+
+#     bounds = sc.textFile(center_dir).mapPartitionsWithIndex(extract_bounds)
     
-    parking_violations = parking_violations_list.join(bounds).values()\
-                                                .mapPartitionsWithIndex(filter_id)\
-                                                .sortByKey()\
+#     parking_violations = parking_violations_list.join(bounds).values()\
+#                                                 .mapPartitionsWithIndex(filter_id)\
+#                                                 .sortByKey()\
 #                                            .mapPartitionsWithIndex(reduce_csv)\
 #                                            .saveAsTextFile('parkingTiCkets')
 
@@ -475,6 +457,7 @@ if __name__ == '__main__':
     
 
     
-    parking_violations.mapPartitionsWithIndex(reduce_csv).saveAsTextFile('parkingTiCkets')
+    parking_violations = parking_violations_list.sortByKey()
+    parking_violations.mapPartitionsWithIndex(reduce_csv).saveAsTextFile('nyc_tickets_count')
 #     parking_violations_list.saveAsTextFile('parkingCount_xd')
 
