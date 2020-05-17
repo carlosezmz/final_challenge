@@ -235,7 +235,7 @@ def extract_bounds(partID, records):
         if county in ['staten island', 'new york', 'bronx', 'brooklyn', 'queens']:
             phy_id = int(row[0])
             st_name1 = check_name(row[28])
-            st_name2 = check_name(row[28])
+            st_name2 = check_name(row[29])
             (l_low, l_hig) = street_bounds(row[1], row[3], row[4], row[5])
             
             if st_name1 != st_name2: continue
