@@ -201,7 +201,7 @@ def extract_cols(partId, records):
             
             if not len(row[4]) > 9: continue
                 
-            date = datetime.strptime(row[4], '%m/%d/%Y')
+            date = str(datetime.strptime(row[4], '%m/%d/%Y'))
             year = int(datetime.strptime(row[4], '%m/%d/%Y').year)
             st_name = check_name(row[24].lower())
             
@@ -234,15 +234,15 @@ def extract_bounds(partID, records):
         
         if county in ['staten island', 'new york', 'bronx', 'brooklyn', 'queens']:
             phy_id = int(row[0])
-            st_name1 = check_name(row[28])
-            st_name2 = check_name(row[29])
+            st_name = check_name(row[28])
+#             st_name2 = check_name(row[29])
             (l_low, l_hig) = street_bounds(row[1], row[3], row[4], row[5])
             
-            if st_name1 != st_name2: continue
+#             if st_name1 != st_name2: continue
             
             if (l_hig != l_low) & (type(l_low) == tuple) & (type(l_hig) == tuple):
         
-                    yield ((county, st_name1), (phy_id, l_low, l_hig))
+                    yield ((county, st_name), (phy_id, l_low, l_hig))
 
             
 
@@ -369,13 +369,13 @@ if __name__ == '__main__':
             
         else:
             
-            parking_violations_list = parking_violations_list.union(rdd).distinct().cache()
+            parking_violations_list = parking_violations_list.union(rdd).cache()
             
 
             
 
     
-    parking_violations = parking_violations_list.sortByKey().mapPartitionsWithIndex(reduce_csv)
+    parking_violations = parking_violations_list.distinct().sortByKey().mapPartitionsWithIndex(reduce_csv)
 #     count_tickts = parking_violations.mapPartitionsWithIndex(count_tickets).reduce(lambda x,y: x+y)
     
     parking_violations.saveAsTextFile('nyc_tickets_count')
