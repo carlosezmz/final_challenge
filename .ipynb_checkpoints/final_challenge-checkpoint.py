@@ -213,7 +213,7 @@ def extract_cols(partId, records):
                     
                     if summos:
                     
-                        yield ((county, st_name), (number, year, summos))
+                        yield ((county, st_name), (number, year, summos, date))
                     
  
     
@@ -357,7 +357,7 @@ if __name__ == '__main__':
         
             
         rdd = sc.textFile(file)\
-                .mapPartitionsWithIndex(extract_cols).distinct()
+                .mapPartitionsWithIndex(extract_cols)
 
 
         rdd = rdd.join(bounds).values()\
@@ -369,7 +369,7 @@ if __name__ == '__main__':
             
         else:
             
-            parking_violations_list = parking_violations_list.union(rdd).cache()
+            parking_violations_list = parking_violations_list.union(rdd).distinct().cache()
             
 
             
