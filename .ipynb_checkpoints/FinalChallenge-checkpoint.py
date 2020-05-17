@@ -408,7 +408,7 @@ if __name__ == '__main__':
     
 #     parking_violations = rdd_union(sc, files_list).collect()
     
-    bounds = sc.textFile(center_dir).mapPartitionsWithIndex(extract_bounds)
+#     bounds = sc.textFile(center_dir).mapPartitionsWithIndex(extract_bounds)
     
 #     bounds = sc.broadcast(bounds)
     
