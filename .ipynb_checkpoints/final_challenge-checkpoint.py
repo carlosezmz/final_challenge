@@ -356,9 +356,9 @@ if __name__ == '__main__':
             
 
     
-    parking_violations = parking_violations_list.sortByKey().mapPartitionsWithIndex(reduce_csv)
+    parking_violations = parking_violations_list.sortByKey().mapPartitionsWithIndex(reduce_csv)d
     count_tickts = parking_violations.mapPartitionsWithIndex(count_tickets).reduce(lambda x,y: x+y)
     
-    parking_violations.saveAsTextFile('nyc_tickets_count')
+#     parking_violations.saveAsTextFile('nyc_tickets_count')
     count_tickts.saveAsTextFile('total_count')
 
