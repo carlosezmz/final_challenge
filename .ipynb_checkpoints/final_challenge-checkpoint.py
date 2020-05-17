@@ -296,6 +296,20 @@ def filter_id(partID, records):
         if (row[0][0] >= row[1][1]) & (row[0][0] <= row[1][2]):
             
             yield (row[1][0], row[0][1])
+            
+def count_tickets(partID, records):
+    
+    for row in records:
+        
+        row = row.split(',')
+        
+        row = row[1:6]
+        
+        row = [int(r) for r in row]
+        
+        row = sum(row)
+        
+        yield row
         
             
 if __name__ == '__main__':
@@ -342,6 +356,9 @@ if __name__ == '__main__':
             
 
     
-    parking_violations = parking_violations_list.sortByKey()
-    parking_violations.mapPartitionsWithIndex(reduce_csv).saveAsTextFile('nyc_tickets_count.csv')
+    parking_violations = parking_violations_list.sortByKey().mapPartitionsWithIndex(reduce_csv)
+    count_tickts = parking_violations.mapPartitionsWithIndex(count_tickets).reduce(lambda x,y: x+y)
+    
+    parking_violations.saveAsTextFile('nyc_tickets_count')
+    count_tickts.saveAsTextFile('total_count')
 
