@@ -165,16 +165,16 @@ def street_bounds(l_low, l_hig, r_low, r_hig):
     
     return (l_low, l_hig)
 
-# def check_summos(summos):
+def check_summos(summos):
     
-#     try:
-#         summos = int(summos)
+    try:
+        summos = int(summos)
         
-#         return summos
+        return summos
         
-#     except ValueError:
+    except ValueError:
         
-#         return None
+        return None
 
 
         
