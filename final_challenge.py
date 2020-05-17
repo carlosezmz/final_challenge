@@ -339,7 +339,7 @@ if __name__ == '__main__':
         
             
         rdd = sc.textFile(file)\
-                .mapPartitionsWithIndex(extract_cols)
+                .mapPartitionsWithIndex(extract_cols).distinct()
 
 
         rdd = rdd.join(bounds).values()\
