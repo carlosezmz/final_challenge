@@ -213,7 +213,7 @@ def extract_cols(partId, records):
                     
                     if summos:
                     
-                        yield ((county, st_name), (number, year, date))
+                        yield ((county, st_name), (number, year, summos))
                     
  
     
