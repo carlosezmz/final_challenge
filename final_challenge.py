@@ -165,16 +165,16 @@ def street_bounds(l_low, l_hig, r_low, r_hig):
     
     return (l_low, l_hig)
 
-def check_summos(summos):
+# def check_summos(summos):
     
-    try:
-        summos = int(summos)
+#     try:
+#         summos = int(summos)
         
-        return summos
+#         return summos
         
-    except ValueError:
+#     except ValueError:
         
-        return None
+#         return None
 
 
         
@@ -197,10 +197,11 @@ def extract_cols(partId, records):
             
             county = check_county(row[21].lower())
             number = check_house_number(str(row[23]))
-            summos = check_summos(row[0])
+#             summos = check_summos(row[0])
             
             if not len(row[4]) > 9: continue
                 
+            date = datetime.strptime(row[4], '%m/%d/%Y')
             year = int(datetime.strptime(row[4], '%m/%d/%Y').year)
             st_name = check_name(row[24].lower())
             
@@ -212,7 +213,7 @@ def extract_cols(partId, records):
                     
                     if summos:
                     
-                        yield ((county, st_name), (number, year, summos))
+                        yield ((county, st_name), (number, year, date))
                     
  
     
