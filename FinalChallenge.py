@@ -244,7 +244,7 @@ def extract_cols(partId, records):
                 
                 if (type(number[0]) == int) & (type(number[1]) == int) & (type(number) == tuple):
                     
-                    yield ((county, st_name), (number, year))
+                    yield (county, st_name, number, year)
                     
 #                     phy_id = get_phyID(county, st_name, number, df)
                     
@@ -294,7 +294,7 @@ def extract_bounds(partID, records):
             
             if (l_hig != l_low) & (type(l_low) == tuple) & (type(l_hig) == tuple):
         
-                    yield ((county, st_name), (phy_id, l_low, l_hig))
+                    yield (county, st_name, phy_id, l_low, l_hig)
 
             
             
