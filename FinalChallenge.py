@@ -263,14 +263,14 @@ def extract_cols(partId, records):
     
 
     
-def load_bounds(bond):
+# def load_bounds(bond):
         
     
-    import pandas as pd
+#     import pandas as pd
     
-    df = pd.DataFrame(bond, columns=['county', 'st_name', 'phy_id', 'l_low', 'l_hig'])
+#     df = pd.DataFrame(bond, columns=['county', 'st_name', 'phy_id', 'l_low', 'l_hig'])
             
-    return df    
+#     return df    
     
     
 def extract_bounds(partID, records):
@@ -468,8 +468,8 @@ if __name__ == '__main__':
     parking_violations = parking_violations.join(bounds).values()\
                                                 .mapPartitionsWithIndex(filter_id)\
                                                 .sortByKey()\
-                                           .mapPartitionsWithIndex(reduce_csv)\
-                                           .saveAsTextFile('parkingTiCkets')
+#                                            .mapPartitionsWithIndex(reduce_csv)\
+#                                            .saveAsTextFile('parkingTiCkets')
 
 
     

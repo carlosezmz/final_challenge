@@ -244,7 +244,7 @@ def extract_cols(partId, records):
                 
                 if (type(number[0]) == int) & (type(number[1]) == int) & (type(number) == tuple):
                     
-                    yield (county, st_name, number, year)
+                    yield ((county, st_name), (number, year))
                     
 #                     phy_id = get_phyID(county, st_name, number, df)
                     
@@ -263,14 +263,14 @@ def extract_cols(partId, records):
     
 
     
-def load_bounds(bond):
+# def load_bounds(bond):
         
     
-    import pandas as pd
+#     import pandas as pd
     
-    df = pd.DataFrame(bond, columns=['county', 'st_name', 'phy_id', 'l_low', 'l_hig'])
+#     df = pd.DataFrame(bond, columns=['county', 'st_name', 'phy_id', 'l_low', 'l_hig'])
             
-    return df    
+#     return df    
     
     
 def extract_bounds(partID, records):
@@ -294,7 +294,7 @@ def extract_bounds(partID, records):
             
             if (l_hig != l_low) & (type(l_low) == tuple) & (type(l_hig) == tuple):
         
-                    yield (county, st_name, phy_id, l_low, l_hig)
+                    yield ((county, st_name), (phy_id, l_low, l_hig))
 
             
             
@@ -408,7 +408,7 @@ if __name__ == '__main__':
     
 #     parking_violations = rdd_union(sc, files_list).collect()
     
-#     bounds = sc.textFile(center_dir).mapPartitionsWithIndex(extract_bounds)
+    bounds = sc.textFile(center_dir).mapPartitionsWithIndex(extract_bounds)
     
 #     bounds = sc.broadcast(bounds)
     
@@ -416,31 +416,31 @@ if __name__ == '__main__':
 #     parking_violations = rdd_union(sc, files_list)
 
     
-    for idx, file in enumerate(files_list):
+#     for idx, file in enumerate(files_list):
         
-        year = int(file[-8:-4])
+#         year = int(file[-8:-4])
         
-        year_file = sc.broadcast([year])
+#         year_file = sc.broadcast([year])
         
             
-        rdd = sc.textFile(file)\
-                .mapPartitionsWithIndex(extract_cols).cache()
-#                 .filter(lambda x: x[1][3] == year).join(bounds).values()\
-#                 .mapPartitionsWithIndex(get_id)
+#         rdd = sc.textFile(file)\
+#                 .mapPartitionsWithIndex(extract_cols).cache()
+# #                 .filter(lambda x: x[1][3] == year).join(bounds).values()\
+# #                 .mapPartitionsWithIndex(get_id)
             
-#         rdd = rdd.join(bounds)\
-#                  .values()\
-#                  .mapPartitionsWithIndex(get_id)\
-#                      .reduceByKey(lambda x,y: (x[0]+y[0], x[1]+y[1], x[2]+y[2], x[3]+y[3], x[4]+y[4])).cache()
-#                      .sortByKey().cache()
+# #         rdd = rdd.join(bounds)\
+# #                  .values()\
+# #                  .mapPartitionsWithIndex(get_id)\
+# #                      .reduceByKey(lambda x,y: (x[0]+y[0], x[1]+y[1], x[2]+y[2], x[3]+y[3], x[4]+y[4])).cache()
+# #                      .sortByKey().cache()
             
-        if idx == 0:
+#         if idx == 0:
             
-            parking_violations_list = rdd
+#             parking_violations_list = rdd
             
-        else:
+#         else:
             
-            parking_violations_list = parking_violations_list.union(rdd).cache()
+#             parking_violations_list = parking_violations_list.union(rdd).cache()
             
 #         else:
             
@@ -460,21 +460,21 @@ if __name__ == '__main__':
     
 #     parking_violations = sc.parallelize(parking_violations_list)
 
-#     year_file = sc.broadcast([2015])
+    year_file = sc.broadcast([2015])
 
-#     parking_violations = sc.textFile(fie2015_dir)\
-#                            .mapPartitionsWithIndex(extract_cols)\
+    parking_violations = sc.textFile(fie2015_dir)\
+                           .mapPartitionsWithIndex(extract_cols)\
     
-#     parking_violations = parking_violations_list.join(bounds).values()\
-#                                                 .mapPartitionsWithIndex(filter_id)\
-#                                                 .sortByKey()\
+    parking_violations = parking_violations.join(bounds).values()\
+                                                .mapPartitionsWithIndex(filter_id)\
+                                                .sortByKey()\
 #                                            .mapPartitionsWithIndex(reduce_csv)\
-#                                            .saveAsTextFile('parkingCount')
+#                                            .saveAsTextFile('parkingTiCkets')
 
 
     
 
     
-#     parking_violations.mapPartitionsWithIndex(reduce_csv).saveAsTextFile('Tickets')
-    parking_violations_list.saveAsTextFile('parkingCount_xd')
+#     parking_violations.mapPartitionsWithIndex(reduce_csv).saveAsTextFile('parkingTiCkets')
+#     parking_violations_list.saveAsTextFile('parkingCount_xd')
 
