@@ -197,11 +197,11 @@ def extract_cols(partId, records):
             
             county = check_county(row[21].lower())
             number = check_house_number(str(row[23]))
-#             summos = check_summos(row[0])
+            summos = check_summos(row[0])
             
             if not len(row[4]) > 9: continue
                 
-#             date = datetime.strptime(row[4], '%m/%d/%Y')
+            date = datetime.strptime(row[4], '%m/%d/%Y')
             year = int(datetime.strptime(row[4], '%m/%d/%Y').year)
             st_name = check_name(row[24].lower())
             
@@ -211,9 +211,9 @@ def extract_cols(partId, records):
                 
                 if (type(number[0]) == int) & (type(number[1]) == int) & (type(number) == tuple):
                     
-#                     if summos:
+                    if summos:
                     
-                    yield ((county, st_name), (number, year))
+                        yield ((county, st_name), (number, year, summos, date))
                     
  
     
@@ -357,7 +357,7 @@ if __name__ == '__main__':
         
             
         rdd = sc.textFile(file)\
-                .mapPartitionsWithIndex(extract_cols)
+                .mapPartitionsWithIndex(extract_cols).distinct()
 
 
         rdd = rdd.join(bounds).values()\
