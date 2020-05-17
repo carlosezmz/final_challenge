@@ -4,6 +4,7 @@
 
 # main
 from pyspark import SparkContext
+# from pyspark.sql import SQLContext
 
 
 
@@ -357,7 +358,7 @@ if __name__ == '__main__':
 
     
     parking_violations = parking_violations_list.sortByKey().mapPartitionsWithIndex(reduce_csv)
-    count_tickts = parking_violations.mapPartitionsWithIndex(count_tickets).reduce(lambda x,y: x+y)
+#     count_tickts = parking_violations.mapPartitionsWithIndex(count_tickets).reduce(lambda x,y: x+y)
     
-#     parking_violations.saveAsTextFile('nyc_tickets_count')
-    count_tickts.saveAsTextFile('total_count')
+    parking_violations.saveAsTextFile('nyc_tickets_count')
+#     count_tickts.saveAsTextFile('total_count')
