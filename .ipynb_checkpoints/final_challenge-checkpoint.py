@@ -277,11 +277,11 @@ def reduce_csv(_, records):
     
     years_list = [2015, 2016, 2017, 2018, 2019]
     
-    for key, values in records:
+    for values in records:
         
-        phy_id = key
+        phy_id = values[0]
         
-        year = values[1][0]
+        year = values[1]
         
         if year not in years_list: continue
             
@@ -316,7 +316,7 @@ def filter_id(partID, records):
         
         if (row[0][0] >= row[1][1]) & (row[0][0] <= row[1][2]):
             
-            yield (row[1][0], (row[0][1], row[0][2], row[0][3]))
+            yield (row[1][0], row[0][1])
             
 
         
