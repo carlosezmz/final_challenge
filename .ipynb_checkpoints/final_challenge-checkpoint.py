@@ -65,11 +65,16 @@ def check_name(st_name):
                         
                 CHECK_BOL = False
                     
-        elif st_name[1] in ['ST', 'RD', 'AVE', 'BLVD', 'DR', 'PL', 'PY', 'EXPWY', 'E', 'W', 'S', 'N']:
-            st_name = st_name[:2]
+        elif len(st_name) > 1:
+            
+            if st_name[1] in ['ST', 'RD', 'AVE', 'BLVD', 'DR', 'PL', 'PY', 'EXPWY', 'E', 'W', 'S', 'N']:
+                st_name = st_name[:2]
         
-        elif st_name[2] in ['ST', 'RD', 'AVE', 'BLVD', 'DR', 'PL', 'PY', 'EXPWY', 'E', 'W', 'S', 'N']:
-            st_name = st_name[:3]
+            elif st_name[2] in ['ST', 'RD', 'AVE', 'BLVD', 'DR', 'PL', 'PY', 'EXPWY', 'E', 'W', 'S', 'N']:na
+                st_name = st_name[:3]
+                
+        else:
+            CHECK_BOL = False
         
     st_name = ' '.join(st_name)
         
