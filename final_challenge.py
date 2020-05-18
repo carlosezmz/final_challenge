@@ -11,42 +11,65 @@ from pyspark import SparkContext
 
 def check_name(st_name):
     
+    CHECK_BOL = True
+    
     st_name = st_name.upper().replace('AVENUE', 'AVE')
+    st_name = st_name.upper().replace('AV', 'AVE')
+    st_name = st_name.upper().replace('AVE.', 'AVE')
     st_name = st_name.replace('STREET', 'ST')
     st_name = st_name.replace('ROAD', 'RD')
     st_name = st_name.replace('BOULEVARD', 'BLVD')
+    st_name = st_name.replace('BL', 'BLVD')
     st_name = st_name.replace('DRIVE', 'DR')
     st_name = st_name.replace('PLACE', 'PL')
+    st_name = st_name.replace('PARKWAY', 'PY')
+    st_name = st_name.replace('EAST', 'E')
+    st_name = st_name.replace('WEST', 'W')
+    st_name = st_name.replace('NORTH', 'N')
+    st_name = st_name.replace('SOUTH', 'S')
+    st_name = st_name.replace('EXPRESSWAY', 'EXPWY')
     
     st_name = st_name.split(' ')
+    
+    while CHECK_BOL:
         
-    if st_name[-1] in ['ST', 'RD', 'AVE', 'BL', 'DR', 'PL']:
+        if st_name[-1] in ['ST', 'RD', 'AVE', 'BLVD', 'DR', 'PL', 'PY', 'EXPWY', 'E', 'W', 'S', 'N']:
             
-        if len(st_name) == 3:
-            try:
-                if st_name[1][-2:] in ['TH', 'ST', 'RD', 'ND']:
-                    st_name[1] = int(st_name[1][:-2])
-                    st_name[1] = str(st_name[1])
+            if len(st_name) == 3:
+                try:
+                    if st_name[1][-2:] in ['TH', 'ST', 'RD', 'ND']:
+                        st_name[1] = int(st_name[1][:-2])
+                        st_name[1] = str(st_name[1])
                 
-                else:
-                    st_name[1] = int(st_name[1])
-                    st_name[1] = str(st_name[1])
+                    else:
+                        st_name[1] = int(st_name[1])
+                        st_name[1] = str(st_name[1])
                 
-            except ValueError:
-                    st_name[1] = st_name[1]
+                except ValueError:
+                        st_name[1] = st_name[1]
                         
-        elif len(st_name) == 2:
-            try:
-                if st_name[0][-2:] in ['TH', 'ST', 'RD', 'ND']:
-                    st_name[0] = int(st_name[0][:-2])
-                    st_name[0] = str(st_name[0])
+                CHECK_BOL = False
+                        
+            elif len(st_name) == 2:
+                try:
+                    if st_name[0][-2:] in ['TH', 'ST', 'RD', 'ND']:
+                        st_name[0] = int(st_name[0][:-2])
+                        st_name[0] = str(st_name[0])
                 
-                else:
-                    st_name[0] = int(st_name[0])
-                    st_name[0] = str(st_name[0])
+                    else:
+                        st_name[0] = int(st_name[0])
+                        st_name[0] = str(st_name[0])
             
-            except ValueError:
-                    st_name[0] = st_name[0]
+                except ValueError:
+                        st_name[0] = st_name[0]
+                        
+                CHECK_BOL = False
+                    
+        elif st_name[1] in ['ST', 'RD', 'AVE', 'BLVD', 'DR', 'PL', 'PY', 'EXPWY', 'E', 'W', 'S', 'N']:
+            st_name = st_name[:2]
+        
+        elif st_name[2] in ['ST', 'RD', 'AVE', 'BLVD', 'DR', 'PL', 'PY', 'EXPWY', 'E', 'W', 'S', 'N']:
+            st_name = st_name[:3]
         
     st_name = ' '.join(st_name)
         
@@ -201,7 +224,7 @@ def extract_cols(partId, records):
             
             if not len(row[4]) > 9: continue
                 
-            date = str(datetime.strptime(row[4], '%m/%d/%Y'))
+#             date = str(datetime.strptime(row[4], '%m/%d/%Y'))
             year = int(datetime.strptime(row[4], '%m/%d/%Y').year)
             st_name = check_name(row[24].lower())
             
@@ -209,13 +232,13 @@ def extract_cols(partId, records):
 
             if county in ['staten island', 'new york', 'bronx', 'brooklyn', 'queens']:
                 
-                if (type(number[0]) == int) & (type(number[1]) == int) & (type(number) == tuple):
+                if (type(number[0]) == int) & (type(number[1]) == int) & (type(number) == tuple) & (number != (0, 0)):
                     
                     if summos:
                         
                         if len(date) == 19:
                     
-                            yield ((county, st_name), (number, year, summos, date))
+                            yield ((county, st_name), (number, year, summos))
                     
  
     
