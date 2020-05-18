@@ -28,10 +28,10 @@ def check_name(st_name):
     st_name = st_name.replace('PLACE', 'PL')
     st_name = st_name.replace('PARKWAY', 'PWY')
     st_name = st_name.replace('PKWY', 'PWY')
-#     st_name = st_name.replace('EAST', 'E')
-#     st_name = st_name.replace('WEST', 'W')
-#     st_name = st_name.replace('NORTH', 'N')
-#     st_name = st_name.replace('SOUTH', 'S')
+    st_name = st_name.replace('EAST', 'E')
+    st_name = st_name.replace('WEST', 'W')
+    st_name = st_name.replace('NORTH', 'N')
+    st_name = st_name.replace('SOUTH', 'S')
     st_name = st_name.replace('EXPRESSWAY', 'EXPWY')
     st_name = st_name.replace('BRDWAY', 'BROADWAY')
         
@@ -451,7 +451,7 @@ if __name__ == '__main__':
         
             
         rdd = sc.textFile(file)\
-                .mapPartitionsWithIndex(extract_cols).distinct()
+                .mapPartitionsWithIndex(extract_cols)
 
 
         rdd = rdd.join(bounds).values()\
@@ -463,7 +463,7 @@ if __name__ == '__main__':
             
         else:
             
-            parking_violations_list = parking_violations_list.union(rdd).cache()
+            parking_violations_list = parking_violations_list.union(rdd).distinct().cache()
             
 
     
