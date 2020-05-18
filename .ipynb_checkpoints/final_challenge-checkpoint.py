@@ -70,8 +70,12 @@ def check_name(st_name):
             if st_name[1] in ['ST', 'RD', 'AVE', 'BLVD', 'DR', 'PL', 'PY', 'EXPWY', 'E', 'W', 'S', 'N']:
                 st_name = st_name[:2]
         
-            elif st_name[2] in ['ST', 'RD', 'AVE', 'BLVD', 'DR', 'PL', 'PY', 'EXPWY', 'E', 'W', 'S', 'N']:na
-                st_name = st_name[:3]
+            elif len(st_name) > 2:
+                if st_name[2] in ['ST', 'RD', 'AVE', 'BLVD', 'DR', 'PL', 'PY', 'EXPWY', 'E', 'W', 'S', 'N']:
+                    st_name = st_name[:3]
+                    
+            else:
+                CHECK_BOL = False
                 
         else:
             CHECK_BOL = False
@@ -81,7 +85,7 @@ def check_name(st_name):
     if st_name == 'BRDWAY':
         st_name = 'BROADWAY'
             
-    return st_name
+    return st_namenan
 
 def check_house_number(number):
     
