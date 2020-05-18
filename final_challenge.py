@@ -28,10 +28,10 @@ def check_name(st_name):
     st_name = st_name.replace('PLACE', 'PL')
     st_name = st_name.replace('PARKWAY', 'PWY')
     st_name = st_name.replace('PKWY', 'PWY')
-    st_name = st_name.replace('EAST', 'E')
-    st_name = st_name.replace('WEST', 'W')
-    st_name = st_name.replace('NORTH', 'N')
-    st_name = st_name.replace('SOUTH', 'S')
+#     st_name = st_name.replace('EAST', 'E')
+#     st_name = st_name.replace('WEST', 'W')
+#     st_name = st_name.replace('NORTH', 'N')
+#     st_name = st_name.replace('SOUTH', 'S')
     st_name = st_name.replace('EXPRESSWAY', 'EXPWY')
     st_name = st_name.replace('BRDWAY', 'BROADWAY')
         
@@ -275,13 +275,13 @@ def extract_cols(partId, records):
 
             if county in ['staten island', 'new york', 'bronx', 'brooklyn', 'queens']:
                 
-                if (type(number[0]) == int) & (type(number[1]) == int) & (type(number) == tuple) & (number != (0, 0)):
+                if (type(number[0]) == int) & (type(number[1]) == int) & (type(number) == tuple):
                     
                     if summos:
                         
-#                         if len(date) == 19:
+                        if len(date) == 19:
                     
-                        yield ((county, st_name), (number, year, summos))
+                        yield ((county, st_name), (number, year, summos, row[4]))
                         
                         
 
@@ -467,7 +467,7 @@ if __name__ == '__main__':
             
 
     
-    parking_violations = parking_violations_list.distinct().sortByKey().mapPartitionsWithIndex(reduce_csv)
+    parking_violations = parking_violations_list.sortByKey().mapPartitionsWithIndex(reduce_csv)
 #     count_tickts = parking_violations.mapPartitionsWithIndex(count_tickets).reduce(lambda x,y: x+y)
     
     parking_violations.saveAsTextFile('nyc_tickets_count')
