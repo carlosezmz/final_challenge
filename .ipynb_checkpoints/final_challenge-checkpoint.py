@@ -275,13 +275,13 @@ def extract_cols(partId, records):
 
             if county in ['staten island', 'new york', 'bronx', 'brooklyn', 'queens']:
                 
-                if (type(number[0]) == int) & (type(number[1]) == int) & (type(number) == tuple) & (numer != (0, 0)):
+                if (type(number[0]) == int) & (type(number[1]) == int) & (type(number) == tuple) & (number != (0, 0)):
                     
                     if summos:
                         
                         if len(date) == 19:
                     
-                            yield ((county, st_name), (number, year, summos, row[4]))
+                            yield ((county, st_name), (number, year))
                         
                         
 
@@ -371,11 +371,11 @@ def reduce_csv(_, records):
     
     years_list = [2015, 2016, 2017, 2018, 2019]
     
-    for key, values in records:
+    for values in records:
         
-        phy_id = key
+        phy_id = values[0]
         
-        year = values[0]
+        year = values[1]
         
         idx = years_list.index(year)
         
@@ -409,7 +409,7 @@ def filter_id(partID, records):
         
         if (row[0][0] >= row[1][1]) & (row[0][0] <= row[1][2]):
             
-            yield (row[1][0], (row[0][1], row[1][2]))
+            yield (row[1][0], row[0][1])
             
 def check_summos(summos):
     
