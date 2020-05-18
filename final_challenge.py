@@ -212,8 +212,10 @@ def extract_cols(partId, records):
                 if (type(number[0]) == int) & (type(number[1]) == int) & (type(number) == tuple):
                     
                     if summos:
+                        
+                        if len(date) == 19:
                     
-                        yield ((county, st_name), (number, year, summos))
+                            yield ((county, st_name), (number, year, summos, date))
                     
  
     
