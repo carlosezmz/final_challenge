@@ -16,76 +16,93 @@ def check_name(st_name):
     st_name = st_name.upper().replace('AVENUE', 'AVE')
     st_name = st_name.upper().replace('AV', 'AVE')
     st_name = st_name.upper().replace('AVE.', 'AVE')
+    st_name = st_name.upper().replace('AVEE', 'AVE')
     st_name = st_name.replace('STREET', 'ST')
     st_name = st_name.replace('ROAD', 'RD')
+    st_name = st_name.replace('LN', 'LANE')
+    st_name = st_name.replace('GD', 'GRAND')
     st_name = st_name.replace('BOULEVARD', 'BLVD')
     st_name = st_name.replace('BL', 'BLVD')
+    st_name = st_name.replace('BLVDVD', 'BLVD')
     st_name = st_name.replace('DRIVE', 'DR')
     st_name = st_name.replace('PLACE', 'PL')
-    st_name = st_name.replace('PARKWAY', 'PY')
+    st_name = st_name.replace('PARKWAY', 'PWY')
+    st_name = st_name.replace('PKWY', 'PWY')
     st_name = st_name.replace('EAST', 'E')
     st_name = st_name.replace('WEST', 'W')
     st_name = st_name.replace('NORTH', 'N')
     st_name = st_name.replace('SOUTH', 'S')
     st_name = st_name.replace('EXPRESSWAY', 'EXPWY')
-    
+    st_name = st_name.replace('BRDWAY', 'BROADWAY')
+    st_name = st_name.replace('GRAND CONCOURSE', 'GRAND CONCOURSE BLVD')
+        
     st_name = st_name.split(' ')
+    st_name = [name for name in st_name if len(name) > 0]
     
-    while CHECK_BOL:
+    if len(st_name) > 3:
         
-        if st_name[-1] in ['ST', 'RD', 'AVE', 'BLVD', 'DR', 'PL', 'PY', 'EXPWY', 'E', 'W', 'S', 'N']:
+        if st_name[3] in ['ST', 'RD', 'AVE', 'BLVD', 'DR', 'PL', 'PWY', 'EXPWY']:
             
-            if len(st_name) == 3:
-                try:
-                    if st_name[1][-2:] in ['TH', 'ST', 'RD', 'ND']:
-                        st_name[1] = int(st_name[1][:-2])
-                        st_name[1] = str(st_name[1])
-                
-                    else:
-                        st_name[1] = int(st_name[1])
-                        st_name[1] = str(st_name[1])
-                
-                except ValueError:
-                        st_name[1] = st_name[1]
-                        
-                CHECK_BOL = False
-                        
-            elif len(st_name) == 2:
-                try:
-                    if st_name[0][-2:] in ['TH', 'ST', 'RD', 'ND']:
-                        st_name[0] = int(st_name[0][:-2])
-                        st_name[0] = str(st_name[0])
-                
-                    else:
-                        st_name[0] = int(st_name[0])
-                        st_name[0] = str(st_name[0])
+            st_name = st_name[1:4]
             
-                except ValueError:
-                        st_name[0] = st_name[0]
-                        
-                CHECK_BOL = False
-                    
-        elif len(st_name) > 1:
+        elif st_name[2] in ['ST', 'RD', 'AVE', 'BLVD', 'DR', 'PL', 'PWY', 'EXPWY']:
             
-            if st_name[1] in ['ST', 'RD', 'AVE', 'BLVD', 'DR', 'PL', 'PY', 'EXPWY', 'E', 'W', 'S', 'N']:
-                st_name = st_name[:2]
+            st_name = st_name[:3]
+            
+        elif st_name[1] in ['ST', 'RD', 'AVE', 'BLVD', 'DR', 'PL', 'PWY', 'EXPWY']:
+            
+            st_name = st_name[:2]
         
-            elif len(st_name) > 2:
-                if st_name[2] in ['ST', 'RD', 'AVE', 'BLVD', 'DR', 'PL', 'PY', 'EXPWY', 'E', 'W', 'S', 'N']:
-                    st_name = st_name[:3]
-                    
+
+            
+    if len(st_name) == 3:
+        try:
+            if st_name[1][-2:] in ['TH', 'ST', 'RD', 'ND']:
+                st_name[1] = int(st_name[1][:-2])
+                st_name[1] = str(st_name[1])
+                
+                
             else:
-                CHECK_BOL = False
+                st_name[1] = int(st_name[1])
+                st_name[1] = str(st_name[1])
                 
+        except ValueError:
+            st_name[1] = st_name[1]
+            
+                        
+                        
+    elif len(st_name) == 2:
+        
+        if st_name[0] in ['ST', 'RD', 'AVE', 'BLVD', 'DR', 'PL', 'PWY', 'EXPWY']:
+            st_name[0], st_name[1] = st_name[1], st_name[0] 
+            
         else:
-            CHECK_BOL = False
+            try:
+            
+                num = int(st_name[0][:-2])
+            
+                if st_name[0][-2:] in ['TH', 'ST', 'RD', 'ND']:
+                    st_name[0] = int(st_name[0][:-2])
+                    st_name[0] = str(st_name[0])
+                
+                else:
+                    st_name[0] = int(st_name[0])
+                    st_name[0] = str(st_name[0])
+            
+            except ValueError:
+                st_name[0] = st_name[0]
+                        
+                    
+    else:
+        
+        if not st_name: return None
+            
         
     st_name = ' '.join(st_name)
         
-    if st_name == 'BRDWAY':
-        st_name = 'BROADWAY'
+
             
-    return st_namenan
+    return st_name
 
 def check_house_number(number):
     
@@ -245,9 +262,9 @@ def extract_cols(partId, records):
                     
                     if summos:
                         
-                        if len(date) == 19:
+#                         if len(date) == 19:
                     
-                            yield ((county, st_name), (number, year, summos))
+                        yield ((county, st_name), (number, year, summos))
                     
  
     
