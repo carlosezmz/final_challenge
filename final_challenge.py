@@ -243,20 +243,6 @@ def street_bounds(l_low, l_hig, r_low, r_hig):
     return (l_low, l_hig)
 
 
-def get_phyID(county, st_name, number, df):
-    
-    
-    
-    phy_id = df[(df['county'] == county)\
-              & (df['st_name']== st_name)\
-              & (df['l_low'] <= number)\
-              & (df['l_hig'] >= number)]
-    
-
-    try:
-        return phy_id['phy_id'][0]
-    except KeyError:
-        return None
         
 
 def extract_cols(partId, records):
@@ -413,7 +399,7 @@ def reduce_csv(_, records):
             
             rate = ((old_x[4]-old_x[3])+(old_x[3]-old_x[2])+(old_x[2]-old_x[1])+(old_x[1]-old_x[0]))/4
             
-            yield (old_phy_id, old_x[0], old_x[1], old_x[2], old_x[3], old_x[4], rate)
+            yield ','.join((str(old_phy_id), str(old_x[0]), str(old_x[1]), str(old_x[2]), str(old_x[3]), str(old_x[4]), str(rate)))
             
             
             
