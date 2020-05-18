@@ -275,7 +275,7 @@ def extract_cols(partId, records):
 
             if county in ['staten island', 'new york', 'bronx', 'brooklyn', 'queens']:
                 
-                if (type(number[0]) == int) & (type(number[1]) == int) & (type(number) == tuple):
+                if (type(number[0]) == int) & (type(number[1]) == int) & (type(number) == tuple) & (numer != (0, 0)):
                     
                     if summos:
                         
@@ -451,11 +451,11 @@ if __name__ == '__main__':
         
             
         rdd = sc.textFile(file)\
-                .mapPartitionsWithIndex(extract_cols)
+                .mapPartitionsWithIndex(extract_cols).distinct()
 
 
         rdd = rdd.join(bounds).values()\
-                 .mapPartitionsWithIndex(filter_id).distinct()
+                 .mapPartitionsWithIndex(filter_id)
             
         if idx == 0:
             
