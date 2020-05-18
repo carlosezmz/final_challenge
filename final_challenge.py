@@ -250,7 +250,7 @@ def extract_cols(partId, records):
             
             if not len(row[4]) > 9: continue
                 
-#             date = str(datetime.strptime(row[4], '%m/%d/%Y'))
+            date = str(datetime.strptime(row[4], '%m/%d/%Y'))
             year = int(datetime.strptime(row[4], '%m/%d/%Y').year)
             st_name = check_name(row[24].lower())
             
@@ -262,10 +262,10 @@ def extract_cols(partId, records):
                     
                     if summos:
                         
-#                         if len(date) == 19:
+                        if len(date) == 19:
                     
-                        yield ((county, st_name), (number, year, summos))
-                    
+                            yield ((county, st_name), (number, year, date, summos))
+                
  
     
     
