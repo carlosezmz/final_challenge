@@ -283,6 +283,8 @@ def reduce_csv(_, records):
         
         year = values[1][0]
         
+        if year not in years_list: continue
+            
         idx = years_list.index(year)
         
         if (phy_id != current_phy_id) & (current_phy_id == None):
