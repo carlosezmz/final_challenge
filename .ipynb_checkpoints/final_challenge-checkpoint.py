@@ -34,7 +34,6 @@ def check_name(st_name):
     st_name = st_name.replace('SOUTH', 'S')
     st_name = st_name.replace('EXPRESSWAY', 'EXPWY')
     st_name = st_name.replace('BRDWAY', 'BROADWAY')
-    st_name = st_name.replace('GRAND CONCOURSE', 'GRAND CONCOURSE BLVD')
         
     st_name = st_name.split(' ')
     st_name = [name for name in st_name if len(name) > 0]
@@ -74,7 +73,10 @@ def check_name(st_name):
     elif len(st_name) == 2:
         
         if st_name[0] in ['ST', 'RD', 'AVE', 'BLVD', 'DR', 'PL', 'PWY', 'EXPWY']:
-            st_name[0], st_name[1] = st_name[1], st_name[0] 
+            
+            if not st_name[1] in ['ST', 'RD', 'AVE', 'BLVD', 'DR', 'PL', 'PWY', 'EXPWY']:
+
+                st_name[0], st_name[1] = st_name[1], st_name[0] 
             
         else:
             try:
@@ -141,7 +143,7 @@ def check_house_number(number):
                 number = (int(number), 0)
             
             except ValueError:
-                number = (number, 0)
+                number = (0, 0)
                 
                     
     elif type(number) == int:
@@ -161,7 +163,7 @@ def check_county(county):
         'k': 'brooklyn', 'ki':'brooklyn', 'bk':'brooklyn', '3':'brooklyn',
         'q': 'queens', 'qn':'queens', 'qu':'queens', '4':'queens',
         'r': 'staten island', 's':'staten island', 'st':'staten island', 
-            '5':'staten island', 'ri':'staten island'
+            '5':'staten island', 'ri':'staten island', 'si':'staten island'
                 }
     try:
         if len(county) > 2:
@@ -176,7 +178,33 @@ def check_county(county):
         
     return county
 
-  
+
+
+
+def make_bounds(geom):
+
+    lat_list = []
+    lon_list = []
+
+#     emp_list = []
+
+    for latlon in geom.strip('MULTILINESTRING ').strip('()').split(', '):
+    
+        lon, lat = latlon.split(' ')
+#         emp_list.append(float(lon), float(lat))
+    
+        lat_list.append(float(lat)) 
+        lon_list.append(float(lon))
+    
+    if len(lon_list) > 0:
+        
+#         return emp_list
+
+        return ((max(lon_list), min(lon_list)), (max(lat_list), min(lat_list)))
+        
+    else:
+        return None
+    
 
 def get_digits(number):
     
@@ -214,18 +242,21 @@ def street_bounds(l_low, l_hig, r_low, r_hig):
     
     return (l_low, l_hig)
 
-def check_summos(summos):
+
+def get_phyID(county, st_name, number, df):
     
+    
+    
+    phy_id = df[(df['county'] == county)\
+              & (df['st_name']== st_name)\
+              & (df['l_low'] <= number)\
+              & (df['l_hig'] >= number)]
+    
+
     try:
-        summos = int(summos)
-        
-        return summos
-        
-    except ValueError:
-        
+        return phy_id['phy_id'][0]
+    except KeyError:
         return None
-
-
         
 
 def extract_cols(partId, records):
@@ -262,12 +293,12 @@ def extract_cols(partId, records):
                     
                     if summos:
                         
-                        if len(date) == 19:
+#                         if len(date) == 19:
                     
-                            yield ((county, st_name), (number, year, date, summos))
-                
- 
-    
+                        yield ((county, st_name), (number, year, summos))
+                        
+                        
+
     
 def extract_bounds(partID, records):
     
@@ -286,17 +317,43 @@ def extract_bounds(partID, records):
         if county in ['staten island', 'new york', 'bronx', 'brooklyn', 'queens']:
             phy_id = int(row[0])
             st_name1 = check_name(row[28])
-#             st_name2 = check_name(row[29])
-            (l_low, l_hig) = street_bounds(row[1], row[3], row[4], row[5])
+            st_name2 = check_name(row[29])
             
 #             if st_name1 != st_name2: continue
+                
+            (l_low, l_hig) = street_bounds(row[1], row[3], row[4], row[5])
             
             if (l_hig != l_low) & (type(l_low) == tuple) & (type(l_hig) == tuple):
+                
+                if st_name1:
         
-                    yield ((county, st_name1), (phy_id, l_low, l_hig))
+                        yield ((county, st_name1), (phy_id, l_low, l_hig))
 
             
+            
 
+def rdd_union(sc, files_list):
+    
+    for idx, file in enumerate(files_list):
+        
+        if idx == 0:
+            
+            rdd = sc.textFile(file).mapPartitionsWithIndex(extract_cols).cache()
+            
+            rdds = rdd
+            
+        else:
+            
+            rdd = sc.textFile(file).mapPartitionsWithIndex(extract_cols).cache()
+            
+            rdds = rdds.union(rdd).cache()
+            
+#     rdds = rdds.distinct()
+            
+#     rdds = rdds.map(lambda x: (x[0], x[2]))
+
+            
+    return rdds.cache()
 
 def get_id(partID, records):
     
@@ -328,14 +385,12 @@ def reduce_csv(_, records):
     
     years_list = [2015, 2016, 2017, 2018, 2019]
     
-    for values in records:
+    for key, values in records:
         
-        phy_id = values[0]
+        phy_id = key
         
-        year = values[1]
+        year = values[0]
         
-        if year not in years_list: continue
-            
         idx = years_list.index(year)
         
         if (phy_id != current_phy_id) & (current_phy_id == None):
@@ -358,7 +413,8 @@ def reduce_csv(_, records):
             
             rate = ((old_x[4]-old_x[3])+(old_x[3]-old_x[2])+(old_x[2]-old_x[1])+(old_x[1]-old_x[0]))/4
             
-            yield ','.join((str(old_phy_id), str(old_x[0]), str(old_x[1]), str(old_x[2]), str(old_x[3]), str(old_x[4]), str(rate)))
+            yield (old_phy_id, old_x[0], old_x[1], old_x[2], old_x[3], old_x[4], rate)
+            
             
             
 def filter_id(partID, records):
@@ -367,7 +423,18 @@ def filter_id(partID, records):
         
         if (row[0][0] >= row[1][1]) & (row[0][0] <= row[1][2]):
             
-            yield (row[1][0], row[0][1])
+            yield (row[1][0], (row[0][1], row[1][2]))
+            
+def check_summos(summos):
+    
+    try:
+        summos = int(summos)
+        
+        return summos
+        
+    except ValueError:
+        
+        return None
             
 
         
@@ -411,8 +478,6 @@ if __name__ == '__main__':
         else:
             
             parking_violations_list = parking_violations_list.union(rdd).cache()
-            
-
             
 
     
