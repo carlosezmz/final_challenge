@@ -455,7 +455,7 @@ if __name__ == '__main__':
 
 
         rdd = rdd.join(bounds).values()\
-                 .mapPartitionsWithIndex(filter_id)
+                 .mapPartitionsWithIndex(filter_id).distinct()
             
         if idx == 0:
             
@@ -463,7 +463,7 @@ if __name__ == '__main__':
             
         else:
             
-            parking_violations_list = parking_violations_list.union(rdd).distinct().cache()
+            parking_violations_list = parking_violations_list.union(rdd).cache()
             
 
     
