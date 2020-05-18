@@ -281,7 +281,7 @@ def extract_cols(partId, records):
                         
                         if len(date) == 19:
                     
-                        yield ((county, st_name), (number, year, summos, row[4]))
+                            yield ((county, st_name), (number, year, summos, row[4]))
                         
                         
 
