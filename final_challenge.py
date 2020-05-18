@@ -209,11 +209,11 @@ def extract_cols(partId, records):
 
             if county in ['staten island', 'new york', 'bronx', 'brooklyn', 'queens']:
                 
-                if (type(number[0]) == int) & (type(number[1]) == int) & (type(number) == tuple) & (number != (0, 0)):
+                if (type(number[0]) == int) & (type(number[1]) == int) & (type(number) == tuple):
                     
                     if summos:
                     
-                        yield ((county, st_name), (number, year, date, summos))
+                        yield ((county, st_name), (number, year, summos))
                     
  
     
@@ -235,10 +235,10 @@ def extract_bounds(partID, records):
         if county in ['staten island', 'new york', 'bronx', 'brooklyn', 'queens']:
             phy_id = int(row[0])
             st_name1 = check_name(row[28])
-            st_name2 = check_name(row[29])
+#             st_name2 = check_name(row[29])
             (l_low, l_hig) = street_bounds(row[1], row[3], row[4], row[5])
             
-            if st_name1 != st_name2: continue
+#             if st_name1 != st_name2: continue
             
             if (l_hig != l_low) & (type(l_low) == tuple) & (type(l_hig) == tuple):
         
