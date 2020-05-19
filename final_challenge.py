@@ -1,5 +1,9 @@
 """
+    Big Data Final Challenge: Count the number of tickets per street segement from
+                              2015-2019 in NYC.
+                              
     @author: Carlos E. Tavarez Martinez
+    
 """
 
 # main
@@ -11,12 +15,23 @@ from pyspark import SparkContext
 
 def check_name(st_name):
     
-    CHECK_BOL = True
+    """
+        This function process street name if there is one and returns
+        a street name with name and tyoe of street. 
+        
+        Example:
+        
+            'remsen street' --> 'REMSEN ST'
+            'grand concourse avee' --> 'GRAND CONCOURSE AVE'
+    """
     
-    st_name = st_name.upper().replace('AVENUE', 'AVE')
-    st_name = st_name.upper().replace('AV', 'AVE')
-    st_name = st_name.upper().replace('AVE.', 'AVE')
-    st_name = st_name.upper().replace('AVEE', 'AVE')
+    # check for some mis-spelling
+    st_name = st_name.upper()
+    
+    st_name = st_name.replace('AVENUE', 'AVE')
+    st_name = st_name.replace('AV', 'AVE')
+    st_name = st_name.replace('AVE.', 'AVE')
+    st_name = st_name.replace('AVEE', 'AVE')
     st_name = st_name.replace('STREET', 'ST')
     st_name = st_name.replace('ROAD', 'RD')
     st_name = st_name.replace('LN', 'LANE')
@@ -35,10 +50,10 @@ def check_name(st_name):
     st_name = st_name.replace('EXPRESSWAY', 'EXPWY')
     st_name = st_name.replace('BRDWAY', 'BROADWAY')
         
-    st_name = st_name.split(' ')
-    st_name = [name for name in st_name if len(name) > 0]
+    st_name = st_name.split(' ') # make list of words
+    st_name = [name for name in st_name if len(name) > 0] # get rid of empty strings
     
-    if len(st_name) > 3:
+    if len(st_name) > 3: # this part adjust the strings to the adequate size to be processed
         
         if st_name[3] in ['ST', 'RD', 'AVE', 'BLVD', 'DR', 'PL', 'PWY', 'EXPWY']:
             
@@ -55,7 +70,7 @@ def check_name(st_name):
 
             
     if len(st_name) == 3:
-        try:
+        try: # check if is a number
             if st_name[1][-2:] in ['TH', 'ST', 'RD', 'ND']:
                 st_name[1] = int(st_name[1][:-2])
                 st_name[1] = str(st_name[1])
@@ -65,7 +80,7 @@ def check_name(st_name):
                 st_name[1] = int(st_name[1])
                 st_name[1] = str(st_name[1])
                 
-        except ValueError:
+        except ValueError: # not shown as number, ex: `fifth avenue`
             st_name[1] = st_name[1]
             
                         
@@ -76,11 +91,10 @@ def check_name(st_name):
             
             if not st_name[1] in ['ST', 'RD', 'AVE', 'BLVD', 'DR', 'PL', 'PWY', 'EXPWY']:
 
-                st_name[0], st_name[1] = st_name[1], st_name[0] 
+                st_name[0], st_name[1] = st_name[1], st_name[0] # invert: `AVE U` --> `U AVE`
             
         else:
-            try:
-            
+            try: # check for numbers
                 num = int(st_name[0][:-2])
             
                 if st_name[0][-2:] in ['TH', 'ST', 'RD', 'ND']:
@@ -91,29 +105,44 @@ def check_name(st_name):
                     st_name[0] = int(st_name[0])
                     st_name[0] = str(st_name[0])
             
-            except ValueError:
+            except ValueError: # got a string
                 st_name[0] = st_name[0]
                         
                     
-    else:
+    else: # for empty strings
         
         if not st_name: return None
             
         
     st_name = ' '.join(st_name)
-        
-
             
     return st_name
 
+
+
+
+
 def check_house_number(number):
     
-    if len(number) == 0:
+    """
+        This function process house number if there is one and returns 
+        a tuple of size 2.
+        
+        Example:
+        
+                '' --> (0, 0)
+                '121' --> (121, 0)
+                '110-15' --> (110, 15)
+                '128-23C' --> (128, 23)
+                '120-001' --> (120, 1)  
+    """
+    
+    if len(number) == 0: # check for empty strings
         number = (0, 0)
     
     elif (len(number) > 0) and (type(number) != list):
         
-        if '-' in number:
+        if '-' in number: # remove hifens
             number = number.split('-')
             
             if not number[1]: 
@@ -124,20 +153,15 @@ def check_house_number(number):
                 
             number[0] = get_digits(number[0])
             number[1] = get_digits(number[1])
+            
             try:
                 number = (int(number[0]), int(number[1]))
                     
             except ValueError:
-
-#                 try:
                         
                     number = (0, 0)
-
-#                 except ValueError:
-        
-#                     number = (number[0], 0)
             
-        else:
+        else: # process no hifens
             number = get_digits(number)
             try:
                 number = (int(number), 0)
@@ -149,13 +173,18 @@ def check_house_number(number):
     elif type(number) == int:
         number = (int(number), 0)
                     
-    elif type(number) == list:
+    elif type(number) == list: # some mis-spelling
         number[0] = get_digits(number[0])
         number = (number[0], 0)
                     
     return number
 
 def check_county(county):
+    
+    """
+        This function returns the name of the county if it matches
+        the dictionary encoded below.
+    """
     
     boro_dict = {
         'ny':'new york', 'ne': 'new york', 'ma':'new york', 'mn':'new york', '1': 'new york', 'mh':'new york',
@@ -165,48 +194,31 @@ def check_county(county):
         'r': 'staten island', 's':'staten island', 'st':'staten island', 
             '5':'staten island', 'ri':'staten island', 'si':'staten island'
                 }
-    try:
-        if len(county) > 2:
+    try: 
+        if len(county) > 2:# if it has the whole name
             county = boro_dict[county[:2]]
             
         elif (len(county) <= 2) & (len(county) > 0):
             county = boro_dict[county]
         
-    except KeyError:
+    except KeyError: # does not match
 
         county = ''
         
     return county
 
 
-
-
-def make_bounds(geom):
-
-    lat_list = []
-    lon_list = []
-
-#     emp_list = []
-
-    for latlon in geom.strip('MULTILINESTRING ').strip('()').split(', '):
-    
-        lon, lat = latlon.split(' ')
-#         emp_list.append(float(lon), float(lat))
-    
-        lat_list.append(float(lat)) 
-        lon_list.append(float(lon))
-    
-    if len(lon_list) > 0:
-        
-#         return emp_list
-
-        return ((max(lon_list), min(lon_list)), (max(lat_list), min(lat_list)))
-        
-    else:
-        return None
     
 
 def get_digits(number):
+    
+    """
+        This function get all digits from a string.
+        
+        Ecample:
+        
+                '11C' --> 11
+    """
     
     import re
     
@@ -216,12 +228,23 @@ def get_digits(number):
     
         digits = ''.join(digits)
     
-        if len(digits) > 0: return digits
+        if len(digits) > 0: return digits 
     
         return 0
     return 0
 
+
+
+
+
+
 def street_bounds(l_low, l_hig, r_low, r_hig):
+    
+    """
+        This function takes maximum and minimum numbers of both sides of the 
+        street and returns the minimum of both lows and the maximum of boths
+        higs. 
+    """
 
     
     if len(l_low) == 0: l_low = (0, 0)
@@ -243,10 +266,18 @@ def street_bounds(l_low, l_hig, r_low, r_hig):
     return (l_low, l_hig)
 
 
+
+
         
 
 def extract_cols(partId, records):
     
+    """
+        This function process the data from NYC Parking Tickets. 
+        It only returns the rows that belong to the year specified
+        in the file. It also checks that every ticket must have a 
+        valid summos number and that the issue dat was properly written.
+    """
 
     if partId==0:
         next(records)
@@ -261,23 +292,27 @@ def extract_cols(partId, records):
         
         if len(row) == 43:
             
-            county = check_county(row[21].lower())
-            number = check_house_number(str(row[23]))
-            summos = check_summos(row[0])
+            county = check_county(row[21].lower()) # process county name
+            number = check_house_number(str(row[23])) # process house number
+            summos = check_summos(row[0]) # process summos number
             
-            if not len(row[4]) > 9: continue
+            # proper date
+            if not len(row[4]) > 9: continue 
                 
             date = str(datetime.strptime(row[4], '%m/%d/%Y'))
             year = int(datetime.strptime(row[4], '%m/%d/%Y').year)
-            st_name = check_name(row[24].lower())
+            st_name = check_name(row[24].lower()) # process street name
             
-            if year != year_file.value[0]: continue
+            # year of the file
+            if year != year_file.value[0]: continue 
 
-            if county in ['staten island', 'new york', 'bronx', 'brooklyn', 'queens']:
                 
-                if (type(number[0]) == int) & (type(number[1]) == int) & (type(number) == tuple) & (number != (0, 0)):
+            if county in ['staten island', 'new york', 'bronx', 'brooklyn', 'queens']: # filter county
+                
+                # proper house number
+                if (type(number[0]) == int) & (type(number[1]) == int) & (type(number) == tuple) & (number != (0, 0)): 
                     
-                    if summos:
+                    if summos: # proper summos number
                         
                         if len(date) == 19:
                     
@@ -287,6 +322,11 @@ def extract_cols(partId, records):
 
     
 def extract_bounds(partID, records):
+    
+    """
+        This function process the records in NYC Centerline that
+        have a proper county, street name and house number bounds.
+    """
     
     if partID == 0:
         next(records)
@@ -298,12 +338,12 @@ def extract_bounds(partID, records):
 
     for row in reader:
             
-        county = check_county(row[13])
+        county = check_county(row[13]) # process county
         
         if county in ['staten island', 'new york', 'bronx', 'brooklyn', 'queens']:
             phy_id = int(row[0])
             st_name1 = check_name(row[28])
-            st_name2 = check_name(row[29])
+#             st_name2 = check_name(row[29])
             
 #             if st_name1 != st_name2: continue
                 
@@ -316,53 +356,19 @@ def extract_bounds(partID, records):
                         yield ((county, st_name1), (phy_id, l_low, l_hig))
 
             
-            
-
-def rdd_union(sc, files_list):
-    
-    for idx, file in enumerate(files_list):
-        
-        if idx == 0:
-            
-            rdd = sc.textFile(file).mapPartitionsWithIndex(extract_cols).cache()
-            
-            rdds = rdd
-            
-        else:
-            
-            rdd = sc.textFile(file).mapPartitionsWithIndex(extract_cols).cache()
-            
-            rdds = rdds.union(rdd).cache()
-            
-#     rdds = rdds.distinct()
-            
-#     rdds = rdds.map(lambda x: (x[0], x[2]))
 
             
-    return rdds.cache()
-
-def get_id(partID, records):
-    
-    for row in records:
-        
-        if row[0][0] != row[1][0]: continue
-            
-        if (row[0][0] >= row[1][1]) & (row[0][0] <= row[1][2]):
-            
-            year_d = {2015:0, 2016:0, 2017:0, 2018:0, 2019:0}
-            
-            if row[0][2] in year_d:
-                
-                year_d[row[0][2]] = 1
-                
-                year_t = (year_d[2015], year_d[2016], year_d[2017], year_d[2018], year_d[2019])
-            
-                yield (row[0][1], year_t)
-    
  
     
 def reduce_csv(_, records):
     
+    """
+        This function counts the number of ticket per year for each physical ID.
+        After counting all tickets per year, it gets the rate of tickets per
+        physical ID.
+    """
+    
+    # counting variables
     old_phy_id = None
     current_phy_id = None
     x = [0, 0, 0, 0, 0]
@@ -379,16 +385,16 @@ def reduce_csv(_, records):
         
         idx = years_list.index(year)
         
-        if (phy_id != current_phy_id) & (current_phy_id == None):
+        if (phy_id != current_phy_id) & (current_phy_id == None): # first record
             
             current_phy_id = phy_id
             x[idx] += 1
             
-        elif (phy_id == current_phy_id):
+        elif (phy_id == current_phy_id): # keep counting
             
             x[idx] += 1
             
-        else:
+        else: # get rate and return as csv format
             
             old_phy_id = current_phy_id
             current_phy_id = phy_id
@@ -403,7 +409,15 @@ def reduce_csv(_, records):
             
             
             
+            
+            
 def filter_id(partID, records):
+    
+    """
+        This function returns the physical ID and the year if
+        the house number is within the bounds of the physical ID
+        segment.
+    """
     
     for row in records:
         
@@ -411,7 +425,14 @@ def filter_id(partID, records):
             
             yield (row[1][0], row[0][1])
             
+            
+            
+            
 def check_summos(summos):
+    
+    """
+        This function makes sure summos number is an integer.
+    """
     
     try:
         summos = int(summos)
@@ -445,15 +466,16 @@ if __name__ == '__main__':
     
     for idx, file in enumerate(files_list):
         
+        # broadcast the year of the file
         year = int(file[-8:-4])
-        
         year_file = sc.broadcast([year])
         
-            
+        
+        # load and process parking tickets violations
         rdd = sc.textFile(file)\
                 .mapPartitionsWithIndex(extract_cols).distinct()
-
-
+        
+        # inner join with centerline and getting the physical ID
         rdd = rdd.join(bounds).values()\
                  .mapPartitionsWithIndex(filter_id)
             
